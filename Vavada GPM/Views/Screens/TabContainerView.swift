@@ -15,11 +15,11 @@ struct TabContainerView: View {
                     case 0:
                         MainMenuScreen()
                     case 1:
-                        PlaceholderScreen(title: "Second Tab")
+                        MarketSimulatorScreen()
                     case 2:
-                        PlaceholderScreen(title: "Third Tab")
+                        RulesScreen()
                     case 3:
-                        PlaceholderScreen(title: "Fourth Tab")
+                        AboutScreen()
                     default:
                         MainMenuScreen()
                     }
