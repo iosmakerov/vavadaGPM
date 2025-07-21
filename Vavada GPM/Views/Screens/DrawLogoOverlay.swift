@@ -4,6 +4,7 @@ struct DrawLogoOverlay: View {
     @Binding var isPresented: Bool
     @State private var paths: [Path] = []
     @State private var currentPath = Path()
+    @State private var showBuildPitch = false
     
     var body: some View {
         ZStack {
@@ -98,9 +99,7 @@ struct DrawLogoOverlay: View {
                     
                     // Кнопка SUBMIT
                     Button(action: {
-                        print("Logo drawing submitted")
-                        // Здесь будет переход к следующему экрану
-                        isPresented = false
+                        showBuildPitch = true
                     }) {
                         ZStack {
                             // Фоновое изображение кнопки из дизайна
@@ -144,6 +143,10 @@ struct DrawLogoOverlay: View {
                     .frame(height: 100)
             }
         }
+        .overlay(
+            // Модальное окно Build Your Pitch
+            showBuildPitch ? BuildYourPitchOverlay(isPresented: $showBuildPitch) : nil
+        )
     }
 }
 
