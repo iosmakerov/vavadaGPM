@@ -3,6 +3,7 @@ import SwiftUI
 struct MainMenuScreen: View {
     @State private var showCreateLobby = false
     @State private var showJoinLobby = false
+    @State private var showAiSimulator = false
     
     var body: some View {
         VStack(spacing: 0) {
@@ -69,7 +70,7 @@ struct MainMenuScreen: View {
                 
                 // Кнопка 3 - компактный фон
                 CustomButton(title: "AI SIMULATOR") {
-                    print("AI Simulator tapped")
+                    showAiSimulator = true
                 }
                 .padding(.horizontal, 32)
                 .padding(.vertical, 16)
@@ -99,6 +100,10 @@ struct MainMenuScreen: View {
         .overlay(
             // Модальное окно Join Lobby
             showJoinLobby ? JoinLobbyOverlay(isPresented: $showJoinLobby) : nil
+        )
+        .overlay(
+            // Модальное окно AI Simulator
+            showAiSimulator ? AiSimulatorOverlay(isPresented: $showAiSimulator) : nil
         )
     }
 }
