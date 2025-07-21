@@ -1,9 +1,9 @@
 import SwiftUI
 
-struct AiSimulatorOverlay: View {
+struct DrawLogoOverlay: View {
     @Binding var isPresented: Bool
-    @State private var startupName = ""
-    @State private var showDrawLogo = false
+    @State private var paths: [Path] = []
+    @State private var currentPath = Path()
     
     var body: some View {
         ZStack {
@@ -53,63 +53,57 @@ struct AiSimulatorOverlay: View {
                 Spacer()
                 
                 // Основная карточка с контентом - по центру
-                VStack(spacing: 28) {
-                    // Enter the startup's name
-                    VStack(spacing: 20) {
-                        Text("Enter the startup's name")
-                            .font(FontManager.body)
-                            .foregroundColor(ColorManager.white)
-                            .fontWeight(.bold)
-                        
-                        // Поле ввода названия стартапа
-                        TextField("House 321", text: $startupName)
-                            .font(.system(size: 18, weight: .medium))
-                            .foregroundColor(startupName.isEmpty ? Color(red: 0.4, green: 0.36, blue: 0.5) : ColorManager.white)
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 18)
-                            .background(
-                                RoundedRectangle(cornerRadius: 15)
-                                    .fill(Color(red: 0.2, green: 0.18, blue: 0.3))
-                            )
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 15)
-                                    .stroke(Color(red: 0.35, green: 0.32, blue: 0.45), lineWidth: 1)
-                            )
-                    }
+                VStack(spacing: 32) {
+                    // Заголовок Draw a logo
+                    Text("Draw a logo")
+                        .font(FontManager.titleLarge)
+                        .foregroundColor(ColorManager.primaryRed)
+                        .fontWeight(.bold)
                     
-                    // Кнопка GENERATE справа от поля ввода
-                    HStack {
-                        Spacer()
+                    // Область для рисования
+                    ZStack {
+                        // Фон области рисования
+                        Rectangle()
+                            .fill(Color(red: 0.25, green: 0.22, blue: 0.35))
                         
-                        Button(action: {
-                            // Сгенерировать случайное название
-                            let names = ["Tech Innovations", "Future Solutions", "Smart Systems", "Digital Ventures", "Next Gen Labs", "Quantum Labs", "AI Dynamics", "Data Fusion"]
-                            startupName = names.randomElement() ?? "House 321"
-                        }) {
-                            ZStack {
-                                // Фоновое изображение зеленой кнопки из дизайна
-                                GreenButtonBackgroundView()
-                                    .clipShape(RoundedRectangle(cornerRadius: 27))
-                                    .shadow(color: .black.opacity(0.25), radius: 3, x: 0, y: 3)
-                                
-                                Text("GENERATE")
-                                    .font(.system(size: 16, weight: .bold))
-                                    .foregroundColor(ColorManager.white)
-                                    .fontWeight(.heavy)
+                        // Canvas для рисования
+                        Canvas { context, size in
+                            for path in paths {
+                                context.stroke(path, with: .color(ColorManager.primaryRed), lineWidth: 3)
                             }
+                            context.stroke(currentPath, with: .color(ColorManager.primaryRed), lineWidth: 3)
                         }
-                        .frame(width: 140, height: 60) // Фиксированная ширина - примерно 30% от полной ширины
+                        .gesture(
+                            DragGesture(minimumDistance: 0)
+                                .onChanged { value in
+                                    let point = value.location
+                                    if currentPath.isEmpty {
+                                        currentPath.move(to: point)
+                                    } else {
+                                        currentPath.addLine(to: point)
+                                    }
+                                }
+                                .onEnded { _ in
+                                    paths.append(currentPath)
+                                    currentPath = Path()
+                                }
+                        )
                     }
-                    .padding(.bottom, 4)
+                    .frame(height: 400)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 15)
+                            .stroke(ColorManager.primaryRed, lineWidth: 2)
+                    )
+                    .clipShape(RoundedRectangle(cornerRadius: 15))
                     
-                    // Кнопка SUBMIT на всю ширину
+                    // Кнопка SUBMIT
                     Button(action: {
-                        if !startupName.isEmpty {
-                            showDrawLogo = true
-                        }
+                        print("Logo drawing submitted")
+                        // Здесь будет переход к следующему экрану
+                        isPresented = false
                     }) {
                         ZStack {
-                            // Фоновое изображение кнопки из дизайна (как на главном экране)
+                            // Фоновое изображение кнопки из дизайна
                             ButtonBackgroundView()
                                 .clipShape(RoundedRectangle(cornerRadius: 27))
                                 .shadow(color: .black.opacity(0.25), radius: 3, x: 0, y: 3)
@@ -150,16 +144,12 @@ struct AiSimulatorOverlay: View {
                     .frame(height: 100)
             }
         }
-        .overlay(
-            // Модальное окно Draw Logo
-            showDrawLogo ? DrawLogoOverlay(isPresented: $showDrawLogo) : nil
-        )
     }
 }
 
-struct AiSimulatorOverlay_Previews: PreviewProvider {
+struct DrawLogoOverlay_Previews: PreviewProvider {
     static var previews: some View {
-        AiSimulatorOverlay(isPresented: .constant(true))
+        DrawLogoOverlay(isPresented: .constant(true))
             .background(Color.gray) // Фон для демонстрации overlay
     }
 } 
