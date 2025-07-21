@@ -2,6 +2,7 @@ import SwiftUI
 
 struct MainMenuScreen: View {
     @State private var showCreateLobby = false
+    @State private var showJoinLobby = false
     
     var body: some View {
         VStack(spacing: 0) {
@@ -53,7 +54,7 @@ struct MainMenuScreen: View {
                 
                 // Кнопка 2 - компактный фон
                 CustomButton(title: "JOIN THE LOBBY") {
-                    print("Join Lobby tapped")
+                    showJoinLobby = true
                 }
                 .padding(.horizontal, 32)
                 .padding(.vertical, 16)
@@ -94,6 +95,10 @@ struct MainMenuScreen: View {
         .overlay(
             // Модальное окно Create Lobby
             showCreateLobby ? CreateLobbyOverlay(isPresented: $showCreateLobby) : nil
+        )
+        .overlay(
+            // Модальное окно Join Lobby
+            showJoinLobby ? JoinLobbyOverlay(isPresented: $showJoinLobby) : nil
         )
     }
 }
