@@ -1,0 +1,121 @@
+import SwiftUI
+
+struct MainMenuScreen: View {
+    var body: some View {
+        VStack(spacing: 0) {
+            // Верхняя часть с заголовком (контент остается как был)
+            VStack {
+                Spacer()
+                Text("NAME")
+                    .font(FontManager.titleLarge)
+                    .foregroundColor(ColorManager.primaryRed)
+                    .shadow(color: .white, radius: 1)
+                Spacer()
+                    .frame(height: 16)
+            }
+            .frame(height: 200)
+            .background(
+                // Независимый фон - баннер с монетами
+                Image("banner_coins-21e14d")
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .ignoresSafeArea(.all, edges: .top)
+                    .overlay(
+                        LinearGradient(
+                            colors: [
+                                Color.black.opacity(0),
+                                Color.black.opacity(0.7)
+                            ],
+                            startPoint: .init(x: 0.5, y: 0.4),
+                            endPoint: .init(x: 0.5, y: 1.0)
+                        )
+                    )
+            )
+            
+            // Кнопки с компактными фонами
+            VStack(spacing: 32) {
+                // Кнопка 1 - компактный фон
+                CustomButton(title: "CREATE LOBBY") {
+                    print("Create Lobby tapped")
+                }
+                .padding(.horizontal, 32)
+                .padding(.vertical, 16)
+                .background(
+                    // Компактный независимый фон
+                    Image("gb_for_button_mainscreen")
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                )
+                .padding(.horizontal, 16)
+                
+                // Кнопка 2 - компактный фон
+                CustomButton(title: "JOIN THE LOBBY") {
+                    print("Join Lobby tapped")
+                }
+                .padding(.horizontal, 32)
+                .padding(.vertical, 16)
+                .background(
+                    // Компактный независимый фон
+                    Image("gb_for_button_mainscreen")
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                )
+                .padding(.horizontal, 16)
+                
+                // Кнопка 3 - компактный фон
+                CustomButton(title: "AI SIMULATOR") {
+                    print("AI Simulator tapped")
+                }
+                .padding(.horizontal, 32)
+                .padding(.vertical, 16)
+                .background(
+                    // Компактный независимый фон
+                    Image("gb_for_button_mainscreen")
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                )
+                .padding(.horizontal, 16)
+            }
+            .padding(.top, 80)
+            .padding(.bottom, 32)
+            
+            Spacer()
+        }
+        .background(
+            // Общий фон как на заглушках - независимый
+            ColorManager.background
+                .ignoresSafeArea(.all)
+        )
+    }
+}
+
+extension Text {
+    func stroke(lineWidth: CGFloat) -> some View {
+        self
+            .background(
+                self
+                    .offset(x: -lineWidth, y: -lineWidth)
+            )
+            .background(
+                self
+                    .offset(x: lineWidth, y: -lineWidth)
+            )
+            .background(
+                self
+                    .offset(x: -lineWidth, y: lineWidth)
+            )
+            .background(
+                self
+                    .offset(x: lineWidth, y: lineWidth)
+            )
+    }
+}
+
+struct MainMenuScreen_Previews: PreviewProvider {
+    static var previews: some View {
+        MainMenuScreen()
+    }
+} 
