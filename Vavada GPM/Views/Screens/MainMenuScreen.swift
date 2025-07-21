@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct MainMenuScreen: View {
+    @State private var showCreateLobby = false
+    
     var body: some View {
         VStack(spacing: 0) {
             // Верхняя часть с заголовком (контент остается как был)
@@ -35,9 +37,9 @@ struct MainMenuScreen: View {
             // Кнопки с компактными фонами
             VStack(spacing: 32) {
                 // Кнопка 1 - компактный фон
-                CustomButton(title: "CREATE LOBBY") {
-                    print("Create Lobby tapped")
-                }
+                                    CustomButton(title: "CREATE LOBBY") {
+                        showCreateLobby = true
+                    }
                 .padding(.horizontal, 32)
                 .padding(.vertical, 16)
                 .background(
@@ -88,6 +90,10 @@ struct MainMenuScreen: View {
             // Общий фон как на заглушках - независимый
             ColorManager.background
                 .ignoresSafeArea(.all)
+        )
+        .overlay(
+            // Модальное окно Create Lobby
+            showCreateLobby ? CreateLobbyOverlay(isPresented: $showCreateLobby) : nil
         )
     }
 }
