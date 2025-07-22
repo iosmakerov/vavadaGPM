@@ -23,17 +23,34 @@ struct AboutScreen: View {
             
             // Центральный контент в карточке
             VStack(spacing: 30) {
-                // Lorem ipsum текст
-                Text("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean commodo ligula eget dolor.")
-                    .font(FontManager.body)
-                    .foregroundColor(ColorManager.white)
-                    .multilineTextAlignment(.center)
-                    .lineLimit(nil)
-                    .padding(.horizontal, 20)
+                // Информация о приложении
+                VStack(spacing: 12) {
+                    Text("🐷 Viral Ventures")
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundColor(ColorManager.primaryRed)
+                    
+                    Text("A ridiculous tabletop game of fake ideas and very questionable investors.")
+                        .font(FontManager.body)
+                        .foregroundColor(ColorManager.white)
+                        .multilineTextAlignment(.center)
+                        .lineLimit(nil)
+                        .padding(.horizontal, 20)
+                }
+                
+                // Кредиты
+                VStack(spacing: 8) {
+                    Text("Designed by. AnedyStudio")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(ColorManager.white)
+                    
+                    Text("Visual by. MariahArt")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(ColorManager.white)
+                }
                 
                 // Версия
-                Text("V \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")")
-                    .font(.system(size: 24, weight: .bold))
+                Text("App version: 1.00")
+                    .font(.system(size: 18, weight: .bold))
                     .foregroundColor(ColorManager.white)
                 
                 // Кнопки

@@ -111,14 +111,8 @@ struct AiSimulatorResultOverlay: View {
     }
     
     private func getDescriptionText() -> String {
-        switch rating {
-        case .fiveStars:
-            return "Outstanding pitch! Your pig-tech startup shows exceptional promise. Investors are excited!"
-        case .threeFourStars:
-            return "Good concept with solid potential. Your innovation addresses market needs but needs refinement."
-        case .oneTwoStars:
-            return "Your idea needs development. The concept has merit but requires better strategy."
-        }
+        let resultMessage = ResultMessageData.getMessage(for: actualStars)
+        return resultMessage.message
     }
 
 } 

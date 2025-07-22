@@ -23,8 +23,8 @@ struct MarketSimulatorScreen: View {
             
             // Основной контент
             VStack(spacing: 0) {
-                // Lorem ipsum текст
-                Text("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum dui augue, vulputate sed nibh ac, viverra finibus velit.")
+                // Описание Market Simulator из документа
+                Text(MarketSimulatorData.description)
                     .font(FontManager.body)
                     .foregroundColor(ColorManager.white)
                     .multilineTextAlignment(.center)

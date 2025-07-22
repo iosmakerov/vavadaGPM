@@ -121,24 +121,32 @@ struct BuildYourPitchOverlay: View {
                                 PitchSection(
                                     title: "Problem Statement",
                                     field1: problemStatement1,
-                                    field2: problemStatement2
-                                ) { fieldNumber in
-                                    openTextInput(
-                                        title: "Problem Statement \(fieldNumber)",
-                                        binding: fieldNumber == 1 ? $problemStatement1 : $problemStatement2
-                                    )
-                                }
+                                    field2: problemStatement2,
+                                    onFieldTap: { fieldNumber in
+                                        openTextInput(
+                                            title: "Problem Statement \(fieldNumber)",
+                                            binding: fieldNumber == 1 ? $problemStatement1 : $problemStatement2
+                                        )
+                                    },
+                                    onGenerateTap: {
+                                        generateProblemStatement()
+                                    }
+                                )
                                 
                                 PitchSection(
                                     title: "Our Solution",
                                     field1: ourSolution1,
-                                    field2: ourSolution2
-                                ) { fieldNumber in
-                                    openTextInput(
-                                        title: "Our Solution \(fieldNumber)",
-                                        binding: fieldNumber == 1 ? $ourSolution1 : $ourSolution2
-                                    )
-                                }
+                                    field2: ourSolution2,
+                                    onFieldTap: { fieldNumber in
+                                        openTextInput(
+                                            title: "Our Solution \(fieldNumber)",
+                                            binding: fieldNumber == 1 ? $ourSolution1 : $ourSolution2
+                                        )
+                                    },
+                                    onGenerateTap: {
+                                        generateSolution()
+                                    }
+                                )
                             }
                             
                             // Вторая строка: Why Now и Call to Action
@@ -146,24 +154,32 @@ struct BuildYourPitchOverlay: View {
                                 PitchSection(
                                     title: "Why Now",
                                     field1: whyNow1,
-                                    field2: whyNow2
-                                ) { fieldNumber in
-                                    openTextInput(
-                                        title: "Why Now \(fieldNumber)",
-                                        binding: fieldNumber == 1 ? $whyNow1 : $whyNow2
-                                    )
-                                }
+                                    field2: whyNow2,
+                                    onFieldTap: { fieldNumber in
+                                        openTextInput(
+                                            title: "Why Now \(fieldNumber)",
+                                            binding: fieldNumber == 1 ? $whyNow1 : $whyNow2
+                                        )
+                                    },
+                                    onGenerateTap: {
+                                        generateWhyNow()
+                                    }
+                                )
                                 
                                 PitchSection(
                                     title: "Call to Action",
                                     field1: callToAction1,
-                                    field2: callToAction2
-                                ) { fieldNumber in
-                                    openTextInput(
-                                        title: "Call to Action \(fieldNumber)",
-                                        binding: fieldNumber == 1 ? $callToAction1 : $callToAction2
-                                    )
-                                }
+                                    field2: callToAction2,
+                                    onFieldTap: { fieldNumber in
+                                        openTextInput(
+                                            title: "Call to Action \(fieldNumber)",
+                                            binding: fieldNumber == 1 ? $callToAction1 : $callToAction2
+                                        )
+                                    },
+                                    onGenerateTap: {
+                                        generateCallToAction()
+                                    }
+                                )
                             }
                         }
                         .padding(.horizontal, 20)
@@ -278,6 +294,55 @@ struct BuildYourPitchOverlay: View {
         editingBinding = binding
         showTextInput = true
     }
+    
+    // MARK: - Generate Methods
+    private func generateProblemStatement() {
+        let randomStatement = PitchContentData.getRandomProblemStatement()
+        if problemStatement1.isEmpty {
+            problemStatement1 = randomStatement
+        } else if problemStatement2.isEmpty {
+            problemStatement2 = randomStatement
+        } else {
+            // Заменяем первое поле если оба заполнены
+            problemStatement1 = randomStatement
+        }
+    }
+    
+    private func generateSolution() {
+        let randomSolution = PitchContentData.getRandomSolution()
+        if ourSolution1.isEmpty {
+            ourSolution1 = randomSolution
+        } else if ourSolution2.isEmpty {
+            ourSolution2 = randomSolution
+        } else {
+            // Заменяем первое поле если оба заполнены
+            ourSolution1 = randomSolution
+        }
+    }
+    
+    private func generateWhyNow() {
+        let randomWhyNow = PitchContentData.getRandomWhyNow()
+        if whyNow1.isEmpty {
+            whyNow1 = randomWhyNow
+        } else if whyNow2.isEmpty {
+            whyNow2 = randomWhyNow
+        } else {
+            // Заменяем первое поле если оба заполнены
+            whyNow1 = randomWhyNow
+        }
+    }
+    
+    private func generateCallToAction() {
+        let randomCallToAction = PitchContentData.getRandomCallToAction()
+        if callToAction1.isEmpty {
+            callToAction1 = randomCallToAction
+        } else if callToAction2.isEmpty {
+            callToAction2 = randomCallToAction
+        } else {
+            // Заменяем первое поле если оба заполнены
+            callToAction1 = randomCallToAction
+        }
+    }
 }
 
 // Компонент секции питча
@@ -286,13 +351,32 @@ struct PitchSection: View {
     let field1: String
     let field2: String
     let onFieldTap: (Int) -> Void
+    let onGenerateTap: () -> Void
     
     var body: some View {
         VStack(spacing: 12) {
-            Text(title)
-                .font(.system(size: 14, weight: .bold))
-                .foregroundColor(ColorManager.white)
-                .multilineTextAlignment(.center)
+            // Заголовок и Generate кнопка
+            HStack {
+                Spacer()
+                Text(title)
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundColor(ColorManager.white)
+                    .multilineTextAlignment(.center)
+                Spacer()
+            }
+            
+            // Generate кнопка
+            Button(action: onGenerateTap) {
+                Text("Generate")
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundColor(ColorManager.white)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(ColorManager.primaryRed)
+                    )
+            }
             
             VStack(spacing: 8) {
                 // Первое поле

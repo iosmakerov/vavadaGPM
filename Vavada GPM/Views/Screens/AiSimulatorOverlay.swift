@@ -82,9 +82,8 @@ struct AiSimulatorOverlay: View {
                         Spacer()
                         
                         Button(action: {
-                            // Сгенерировать случайное название
-                            let names = ["Tech Innovations", "Future Solutions", "Smart Systems", "Digital Ventures", "Next Gen Labs", "Quantum Labs", "AI Dynamics", "Data Fusion"]
-                            startupName = names.randomElement() ?? "House 321"
+                            // Сгенерировать название из готовых вариантов
+                            startupName = StartupNameData.getRandomName()
                         }) {
                             ZStack {
                                 // Фоновое изображение зеленой кнопки из дизайна
