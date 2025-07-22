@@ -1,7 +1,44 @@
 import SwiftUI
+import UIKit
+
+struct CustomTextEditor: UIViewRepresentable {
+    @Binding var text: String
+    
+    func makeUIView(context: Context) -> UITextView {
+        let textView = UITextView()
+        textView.delegate = context.coordinator
+        textView.font = UIFont.systemFont(ofSize: 16)
+        textView.textColor = UIColor.white
+        textView.backgroundColor = UIColor(ColorManager.tabBackground)
+        textView.layer.cornerRadius = 12
+        textView.textContainerInset = UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16)
+        return textView
+    }
+    
+    func updateUIView(_ uiView: UITextView, context: Context) {
+        uiView.text = text
+    }
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+    
+    class Coordinator: NSObject, UITextViewDelegate {
+        let parent: CustomTextEditor
+        
+        init(_ parent: CustomTextEditor) {
+            self.parent = parent
+        }
+        
+        func textViewDidChange(_ textView: UITextView) {
+            parent.text = textView.text
+        }
+    }
+}
 
 struct BuildYourPitchOverlay: View {
     @Binding var isPresented: Bool
+    let onBackToMainMenu: (() -> Void)?
     
     // Состояния для текстовых полей
     @State private var problemStatement1 = ""
@@ -18,6 +55,10 @@ struct BuildYourPitchOverlay: View {
     @State private var currentEditingText = ""
     @State private var currentFieldTitle = ""
     @State private var editingBinding: Binding<String>?
+    
+    // Состояния для лоадера и результатов
+    @State private var showLoadingOverlay = false
+    @State private var showResultOverlay = false
     
     var body: some View {
         ZStack {
@@ -166,8 +207,7 @@ struct BuildYourPitchOverlay: View {
                         
                         // Кнопка SUBMIT
                         Button(action: {
-                            print("Pitch submitted")
-                            isPresented = false
+                            showLoadingOverlay = true
                         }) {
                             ZStack {
                                 ButtonBackgroundView()
@@ -207,6 +247,28 @@ struct BuildYourPitchOverlay: View {
             ) { newText in
                 editingBinding?.wrappedValue = newText
             } : nil
+        )
+        .overlay(
+            // Лоадер экран
+            showLoadingOverlay ? AnyView(
+                AiSimulatorLoadingOverlay(isPresented: $showLoadingOverlay) {
+                    showLoadingOverlay = false
+                    showResultOverlay = true
+                }
+            ) : nil
+        )
+        .overlay(
+            // Экран результатов
+            showResultOverlay ? AnyView(
+                AiSimulatorResultOverlay(isPresented: $showResultOverlay) {
+                    // Back to main menu - закрываем весь AI Simulator
+                    if let onBackToMainMenu = onBackToMainMenu {
+                        onBackToMainMenu()
+                    } else {
+                        isPresented = false
+                    }
+                }
+            ) : nil
         )
     }
     
@@ -298,15 +360,8 @@ struct TextInputOverlay: View {
                     .foregroundColor(ColorManager.white)
                     .fontWeight(.bold)
                 
-                TextEditor(text: $text)
-                    .font(.system(size: 16))
-                    .foregroundColor(ColorManager.white)
-                    .padding(16)
+                CustomTextEditor(text: $text)
                     .frame(height: 150)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Color(red: 0.5, green: 0.3, blue: 0.4))
-                    )
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
                             .stroke(ColorManager.white, lineWidth: 2)
@@ -336,6 +391,6 @@ struct TextInputOverlay: View {
 
 struct BuildYourPitchOverlay_Previews: PreviewProvider {
     static var previews: some View {
-        BuildYourPitchOverlay(isPresented: .constant(true))
+        BuildYourPitchOverlay(isPresented: .constant(true), onBackToMainMenu: nil)
     }
 } 

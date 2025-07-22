@@ -9,6 +9,8 @@ struct ColorManager {
     static let white = Color.white
     static let gradientPurple1 = Color(hex: "#473D55")
     static let gradientPurple2 = Color(hex: "#262233")
+    static let textSecondary = Color(hex: "#BEB7C9")
+    static let tabBackground = Color(hex: "#9D3C4A")
     
     // Градиенты
     static let buttonGradient = LinearGradient(

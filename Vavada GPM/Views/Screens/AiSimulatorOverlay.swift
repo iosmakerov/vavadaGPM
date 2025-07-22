@@ -152,7 +152,13 @@ struct AiSimulatorOverlay: View {
         }
         .overlay(
             // Модальное окно Draw Logo
-            showDrawLogo ? DrawLogoOverlay(isPresented: $showDrawLogo) : nil
+            showDrawLogo ? DrawLogoOverlay(
+                isPresented: $showDrawLogo, 
+                onBackToMainMenu: {
+                    // Закрыть весь AI Simulator и вернуться на главный экран
+                    isPresented = false
+                }
+            ) : nil
         )
     }
 }

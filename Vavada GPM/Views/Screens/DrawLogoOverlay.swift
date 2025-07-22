@@ -2,6 +2,7 @@ import SwiftUI
 
 struct DrawLogoOverlay: View {
     @Binding var isPresented: Bool
+    let onBackToMainMenu: (() -> Void)?
     @State private var paths: [Path] = []
     @State private var currentPath = Path()
     @State private var showBuildPitch = false
@@ -145,14 +146,17 @@ struct DrawLogoOverlay: View {
         }
         .overlay(
             // Модальное окно Build Your Pitch
-            showBuildPitch ? BuildYourPitchOverlay(isPresented: $showBuildPitch) : nil
+            showBuildPitch ? BuildYourPitchOverlay(
+                isPresented: $showBuildPitch, 
+                onBackToMainMenu: onBackToMainMenu
+            ) : nil
         )
     }
 }
 
 struct DrawLogoOverlay_Previews: PreviewProvider {
     static var previews: some View {
-        DrawLogoOverlay(isPresented: .constant(true))
+        DrawLogoOverlay(isPresented: .constant(true), onBackToMainMenu: nil)
             .background(Color.gray) // Фон для демонстрации overlay
     }
 } 
