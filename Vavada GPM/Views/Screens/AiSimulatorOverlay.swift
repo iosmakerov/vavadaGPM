@@ -4,6 +4,7 @@ struct AiSimulatorOverlay: View {
     @Binding var isPresented: Bool
     @State private var startupName = ""
     @State private var showDrawLogo = false
+    @StateObject private var gameData = GameDataService.shared
     
     var body: some View {
         ZStack {
@@ -104,6 +105,7 @@ struct AiSimulatorOverlay: View {
                     // Кнопка SUBMIT на всю ширину
                     Button(action: {
                         if !startupName.isEmpty {
+                            gameData.updatePitchSession(startupName: startupName)
                             showDrawLogo = true
                         }
                     }) {
@@ -159,6 +161,10 @@ struct AiSimulatorOverlay: View {
                 }
             ) : nil
         )
+        .onAppear {
+            // Начинаем новую сессию питча
+            gameData.startNewPitchSession()
+        }
     }
 }
 

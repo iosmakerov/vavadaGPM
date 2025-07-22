@@ -28,6 +28,10 @@ struct ContentView: View {
             }
         }
         .animation(.easeInOut(duration: 0.3), value: appState)
+        .onAppear {
+            // Записываем статистику запуска приложения для App Store
+            GameDataService.shared.recordAppLaunch()
+        }
     }
     
     private func performCloakingCheck() async {

@@ -4,8 +4,12 @@ struct DrawLogoOverlay: View {
     @Binding var isPresented: Bool
     let onBackToMainMenu: (() -> Void)?
     @State private var paths: [Path] = []
+    @State private var pathColors: [Int: Color] = [:]
     @State private var currentPath = Path()
     @State private var showBuildPitch = false
+    @State private var currentColor = ColorManager.primaryRed
+    @State private var lineWidth: CGFloat = 3
+    @StateObject private var gameData = GameDataService.shared
     
     var body: some View {
         ZStack {
@@ -56,11 +60,52 @@ struct DrawLogoOverlay: View {
                 
                 // Основная карточка с контентом - по центру
                 VStack(spacing: 32) {
-                    // Заголовок Draw a logo
-                    Text("Draw a logo")
-                        .font(FontManager.titleLarge)
-                        .foregroundColor(ColorManager.primaryRed)
-                        .fontWeight(.bold)
+                    // Заголовок и инструменты
+                    VStack(spacing: 16) {
+                        Text("Draw a logo")
+                            .font(FontManager.titleLarge)
+                            .foregroundColor(ColorManager.primaryRed)
+                            .fontWeight(.bold)
+                        
+                        // Инструменты рисования
+                        HStack(spacing: 16) {
+                            // Color picker (упрощенный)
+                            HStack(spacing: 8) {
+                                ForEach([ColorManager.primaryRed, ColorManager.white, ColorManager.inactiveGray], id: \.self) { color in
+                                    Button(action: {
+                                        currentColor = color
+                                    }) {
+                                        Circle()
+                                            .fill(color)
+                                            .frame(width: 24, height: 24)
+                                            .overlay(
+                                                Circle()
+                                                    .stroke(currentColor == color ? ColorManager.white : Color.clear, lineWidth: 2)
+                                            )
+                                    }
+                                }
+                            }
+                            
+                            Spacer()
+                            
+                            // Undo button
+                            Button(action: undoLastPath) {
+                                Image(systemName: "arrow.uturn.backward")
+                                    .font(.system(size: 16))
+                                    .foregroundColor(paths.isEmpty ? ColorManager.inactiveGray : ColorManager.white)
+                            }
+                            .disabled(paths.isEmpty)
+                            
+                            // Clear button
+                            Button(action: clearCanvas) {
+                                Image(systemName: "trash")
+                                    .font(.system(size: 16))
+                                    .foregroundColor(paths.isEmpty ? ColorManager.inactiveGray : ColorManager.white)
+                            }
+                            .disabled(paths.isEmpty)
+                        }
+                        .padding(.horizontal, 20)
+                    }
                     
                     // Область для рисования
                     ZStack {
@@ -68,12 +113,30 @@ struct DrawLogoOverlay: View {
                         Rectangle()
                             .fill(Color(red: 0.25, green: 0.22, blue: 0.35))
                         
-                        // Canvas для рисования
-                        Canvas { context, size in
-                            for path in paths {
-                                context.stroke(path, with: .color(ColorManager.primaryRed), lineWidth: 3)
+                        // Placeholder text когда canvas пустой
+                        if paths.isEmpty && currentPath.isEmpty {
+                            VStack(spacing: 8) {
+                                Image(systemName: "scribble.variable")
+                                    .font(.system(size: 40))
+                                    .foregroundColor(ColorManager.inactiveGray)
+                                
+                                Text("Draw your startup logo")
+                                    .font(.system(size: 16))
+                                    .foregroundColor(ColorManager.inactiveGray)
+                                
+                                Text("Tap and drag to start drawing")
+                                    .font(.system(size: 12))
+                                    .foregroundColor(ColorManager.inactiveGray.opacity(0.7))
                             }
-                            context.stroke(currentPath, with: .color(ColorManager.primaryRed), lineWidth: 3)
+                        }
+                        
+                        // Canvas для рисования с сохранением цветов
+                        Canvas { context, size in
+                            for (index, path) in paths.enumerated() {
+                                let color = pathColors[index] ?? ColorManager.primaryRed
+                                context.stroke(path, with: .color(color), lineWidth: lineWidth)
+                            }
+                            context.stroke(currentPath, with: .color(currentColor), lineWidth: lineWidth)
                         }
                         .gesture(
                             DragGesture(minimumDistance: 0)
@@ -86,8 +149,11 @@ struct DrawLogoOverlay: View {
                                     }
                                 }
                                 .onEnded { _ in
-                                    paths.append(currentPath)
-                                    currentPath = Path()
+                                    if !currentPath.isEmpty {
+                                        paths.append(currentPath)
+                                        pathColors[paths.count - 1] = currentColor
+                                        currentPath = Path()
+                                    }
                                 }
                         )
                     }
@@ -100,6 +166,9 @@ struct DrawLogoOverlay: View {
                     
                     // Кнопка SUBMIT
                     Button(action: {
+                        // Сохраняем информацию о создании лого
+                        let logoWasCreated = !paths.isEmpty
+                        gameData.updatePitchSession(logoCreated: logoWasCreated)
                         showBuildPitch = true
                     }) {
                         ZStack {
@@ -151,6 +220,29 @@ struct DrawLogoOverlay: View {
                 onBackToMainMenu: onBackToMainMenu
             ) : nil
         )
+    }
+    
+    // MARK: - Canvas Actions
+    private func undoLastPath() {
+        guard !paths.isEmpty else { return }
+        let lastIndex = paths.count - 1
+        paths.removeLast()
+        pathColors.removeValue(forKey: lastIndex)
+        
+        // Перенумеровываем цвета путей
+        let remainingColors = pathColors
+        pathColors.removeAll()
+        for (index, color) in remainingColors {
+            if index < paths.count {
+                pathColors[index] = color
+            }
+        }
+    }
+    
+    private func clearCanvas() {
+        paths.removeAll()
+        pathColors.removeAll()
+        currentPath = Path()
     }
 }
 

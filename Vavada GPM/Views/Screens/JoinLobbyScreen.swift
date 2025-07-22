@@ -1,8 +1,19 @@
 import SwiftUI
 
+enum JoinLobbyState {
+    case entering
+    case checking
+    case success
+    case failed
+}
+
 struct JoinLobbyOverlay: View {
     @Binding var isPresented: Bool
     @State private var enteredCode = ""
+    @State private var joinState: JoinLobbyState = .entering
+    @State private var errorMessage = ""
+    @State private var joinedLobby: LobbyData?
+    @StateObject private var gameData = GameDataService.shared
     
     var body: some View {
         ZStack {
@@ -60,10 +71,10 @@ struct JoinLobbyOverlay: View {
                             .foregroundColor(ColorManager.white)
                             .fontWeight(.bold)
                         
-                        // Поле ввода кода
+                        // Поле ввода кода с валидацией
                         VStack(spacing: 8) {
                             // Темное поле для ввода
-                            TextField("", text: $enteredCode)
+                            TextField("Enter 6-digit code", text: $enteredCode)
                                 .font(.system(size: 24, weight: .bold, design: .monospaced))
                                 .foregroundColor(ColorManager.white)
                                 .multilineTextAlignment(.center)
@@ -75,17 +86,65 @@ struct JoinLobbyOverlay: View {
                                 )
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 12)
-                                        .stroke(Color(red: 0.4, green: 0.36, blue: 0.5), lineWidth: 1)
+                                        .stroke(getBorderColor(), lineWidth: 2)
                                 )
-                            
-                            // Красные черточки как в макете
-                            HStack(spacing: 12) {
-                                ForEach(0..<6, id: \.self) { _ in
-                                    Rectangle()
-                                        .fill(ColorManager.primaryRed)
-                                        .frame(width: 20, height: 3)
-                                        .cornerRadius(1.5)
+                                .keyboardType(.numberPad)
+                                .onChange(of: enteredCode) { value in
+                                    // Ограничиваем длину до 6 символов
+                                    if value.count > 6 {
+                                        enteredCode = String(value.prefix(6))
+                                    }
+                                    // Сбрасываем состояние ошибки при изменении
+                                    if joinState == .failed {
+                                        joinState = .entering
+                                        errorMessage = ""
+                                    }
                                 }
+                                .disabled(joinState == .checking)
+                            
+                            // Индикатор ввода
+                            HStack(spacing: 4) {
+                                ForEach(0..<6, id: \.self) { index in
+                                    Circle()
+                                        .fill(index < enteredCode.count ? ColorManager.primaryRed : ColorManager.inactiveGray)
+                                        .frame(width: 8, height: 8)
+                                }
+                            }
+                            
+                            // Кнопка JOIN или состояние
+                            if joinState == .checking {
+                                HStack {
+                                    ProgressView()
+                                        .progressViewStyle(CircularProgressViewStyle(tint: ColorManager.primaryRed))
+                                        .scaleEffect(0.8)
+                                    
+                                    Text("Checking code...")
+                                        .font(.system(size: 14))
+                                        .foregroundColor(ColorManager.white)
+                                }
+                                .padding(.top, 8)
+                            } else if enteredCode.count == 6 && joinState == .entering {
+                                Button(action: joinLobby) {
+                                    Text("JOIN LOBBY")
+                                        .font(FontManager.body)
+                                        .foregroundColor(ColorManager.white)
+                                        .fontWeight(.bold)
+                                        .padding(.horizontal, 20)
+                                        .padding(.vertical, 10)
+                                        .background(
+                                            RoundedRectangle(cornerRadius: 15)
+                                                .fill(ColorManager.primaryRed)
+                                        )
+                                }
+                                .padding(.top, 8)
+                            }
+                            
+                            // Сообщение об ошибке
+                            if joinState == .failed && !errorMessage.isEmpty {
+                                Text(errorMessage)
+                                    .font(.system(size: 12))
+                                    .foregroundColor(ColorManager.primaryRed)
+                                    .padding(.top, 4)
                             }
                         }
                     }
@@ -111,12 +170,52 @@ struct JoinLobbyOverlay: View {
                             )
                     }
                     
-                    // Waiting message
-                    Text("Waiting for other players...")
-                        .font(FontManager.body)
-                        .foregroundColor(ColorManager.white)
-                        .fontWeight(.bold)
-                        .multilineTextAlignment(.center)
+                    // Status message
+                    switch joinState {
+                    case .entering:
+                        Text("Enter lobby code or scan QR")
+                            .font(FontManager.body)
+                            .foregroundColor(ColorManager.textSecondary)
+                            .multilineTextAlignment(.center)
+                    case .checking:
+                        Text("Verifying lobby code...")
+                            .font(FontManager.body)
+                            .foregroundColor(ColorManager.white)
+                            .multilineTextAlignment(.center)
+                    case .success:
+                        VStack(spacing: 8) {
+                            Text("✅ Successfully joined!")
+                                .font(FontManager.body)
+                                .foregroundColor(ColorManager.primaryRed)
+                                .fontWeight(.bold)
+                            
+                            if let lobby = joinedLobby {
+                                Text("Lobby: \(lobby.code)")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(ColorManager.white)
+                                
+                                Text("Players: \(lobby.playersCount)")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(ColorManager.textSecondary)
+                            }
+                        }
+                    case .failed:
+                        VStack(spacing: 8) {
+                            Text("❌ Failed to join")
+                                .font(FontManager.body)
+                                .foregroundColor(ColorManager.primaryRed)
+                                .fontWeight(.bold)
+                            
+                            Button("Try Again") {
+                                joinState = .entering
+                                enteredCode = ""
+                                errorMessage = ""
+                            }
+                            .font(.system(size: 14))
+                            .foregroundColor(ColorManager.primaryRed)
+                            .padding(.top, 4)
+                        }
+                    }
                 }
                 .padding(.horizontal, 24)
                 .padding(.vertical, 32)
@@ -133,6 +232,44 @@ struct JoinLobbyOverlay: View {
                 // Пустое пространство снизу для таббара
                 Color.clear
                     .frame(height: 100)
+            }
+        }
+    }
+    
+    // MARK: - Helper Methods
+    private func getBorderColor() -> Color {
+        switch joinState {
+        case .entering:
+            return enteredCode.count == 6 ? ColorManager.primaryRed : Color(red: 0.4, green: 0.36, blue: 0.5)
+        case .checking:
+            return ColorManager.primaryRed
+        case .success:
+            return ColorManager.primaryRed
+        case .failed:
+            return ColorManager.primaryRed.opacity(0.8)
+        }
+    }
+    
+    private func joinLobby() {
+        guard enteredCode.count == 6 else { return }
+        
+        joinState = .checking
+        
+        // Имитируем задержку проверки
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            let success = gameData.joinLobby(code: enteredCode)
+            
+            if success {
+                joinedLobby = gameData.activeLobby
+                joinState = .success
+                
+                // Автоматически закрываем окно через 2 секунды после успешного присоединения
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                    isPresented = false
+                }
+            } else {
+                joinState = .failed
+                errorMessage = "Lobby code not found. Please check the code and try again."
             }
         }
     }

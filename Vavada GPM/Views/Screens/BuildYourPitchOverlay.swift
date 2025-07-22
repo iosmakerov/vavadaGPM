@@ -59,6 +59,7 @@ struct BuildYourPitchOverlay: View {
     // Состояния для лоадера и результатов
     @State private var showLoadingOverlay = false
     @State private var showResultOverlay = false
+    @StateObject private var gameData = GameDataService.shared
     
     var body: some View {
         ZStack {
@@ -223,6 +224,8 @@ struct BuildYourPitchOverlay: View {
                         
                         // Кнопка SUBMIT
                         Button(action: {
+                            // Сохраняем все данные питча перед отправкой
+                            savePitchData()
                             showLoadingOverlay = true
                         }) {
                             ZStack {
@@ -274,9 +277,12 @@ struct BuildYourPitchOverlay: View {
             ) : nil
         )
         .overlay(
-            // Экран результатов
+            // Экран результатов с данными сессии
             showResultOverlay ? AnyView(
-                AiSimulatorResultOverlay(isPresented: $showResultOverlay) {
+                AiSimulatorResultOverlay(
+                    isPresented: $showResultOverlay,
+                    pitchSession: gameData.currentPitchSession
+                ) {
                     // Back to main menu - закрываем весь AI Simulator
                     if let onBackToMainMenu = onBackToMainMenu {
                         onBackToMainMenu()
@@ -342,6 +348,20 @@ struct BuildYourPitchOverlay: View {
             // Заменяем первое поле если оба заполнены
             callToAction1 = randomCallToAction
         }
+    }
+    
+    // MARK: - Save Pitch Data
+    private func savePitchData() {
+        gameData.updatePitchSession(
+            problemStatement1: problemStatement1,
+            problemStatement2: problemStatement2,
+            ourSolution1: ourSolution1,
+            ourSolution2: ourSolution2,
+            whyNow1: whyNow1,
+            whyNow2: whyNow2,
+            callToAction1: callToAction1,
+            callToAction2: callToAction2
+        )
     }
 }
 
