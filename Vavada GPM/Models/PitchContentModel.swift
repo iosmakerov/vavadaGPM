@@ -61,7 +61,7 @@ struct ResultMessageData {
         description: "Investor swipes left with visible nausea."
     )
     static let threeStars = ResultMessage(
-        title: "Polite Pass / Room to Grow", 
+        title: "Polite Pass / Room to Grow",
         message: "Interesting concept, but we need to see traction… or a working product. Or a real pig.",
         description: "Investor claps awkwardly, gives a coin, then checks phone."
     )
@@ -96,4 +96,4 @@ struct MarketSimulatorData {
     static func getRandomEvent() -> String {
         return marketEvents.randomElement() ?? "Market volatility continues"
     }
-} 
+}

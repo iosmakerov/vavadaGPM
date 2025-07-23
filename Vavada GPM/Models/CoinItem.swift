@@ -14,4 +14,4 @@ struct CoinItem: Identifiable {
         CoinItem(name: "Mug Gems", imageName: "coin_mug", value: 2, isPositive: true),
         CoinItem(name: "Pearl Chips", imageName: "coin_pearl", value: 1, isPositive: false)
     ]
-} 
+}

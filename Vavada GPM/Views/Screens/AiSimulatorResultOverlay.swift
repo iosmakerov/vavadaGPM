@@ -137,4 +137,4 @@ struct AiSimulatorResultOverlay: View {
         guard pitchSession != nil else { return }
         gameData.completePitchSession(rating: actualStars)
     }
-} 
+}

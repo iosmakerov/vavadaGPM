@@ -6,4 +6,4 @@ struct FontManager {
     static let body = Font.system(size: 16, weight: .medium, design: .default)
     static let caption = Font.system(size: 14, weight: .regular, design: .default)
     static let button = Font.system(size: 16, weight: .medium, design: .default)
-} 
+}

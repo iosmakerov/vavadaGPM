@@ -20,4 +20,4 @@ struct PlaceholderScreen_Previews: PreviewProvider {
     static var previews: some View {
         PlaceholderScreen(title: "Tab 2")
     }
-} 
+}

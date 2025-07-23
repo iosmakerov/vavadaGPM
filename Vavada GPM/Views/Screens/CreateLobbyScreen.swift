@@ -147,13 +147,13 @@ struct CreateLobbyOverlay: View {
                             .background(Color.white)
                             .clipShape(RoundedRectangle(cornerRadius: 8))
                     }
-                    
+
                     VStack(spacing: 12) {
                         Text("Promo Codes")
                             .font(FontManager.body)
                             .foregroundColor(ColorManager.white)
                             .fontWeight(.bold)
-                        
+
                         LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 12) {
                             PromoCodeView(code: "NEWBIE25", discount: "25% OFF")
                             PromoCodeView(code: "WINNER50", discount: "50% OFF")
@@ -236,6 +236,6 @@ struct CreateLobbyOverlay: View {
 struct CreateLobbyOverlay_Previews: PreviewProvider {
     static var previews: some View {
         CreateLobbyOverlay(isPresented: .constant(true))
-            .background(Color.gray) 
+            .background(Color.gray)
     }
-} 
+}

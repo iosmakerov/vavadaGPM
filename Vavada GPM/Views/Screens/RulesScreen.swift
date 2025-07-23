@@ -206,4 +206,4 @@ struct RulesScreen_Previews: PreviewProvider {
     static var previews: some View {
         RulesScreen()
     }
-} 
+}

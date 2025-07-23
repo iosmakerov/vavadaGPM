@@ -51,4 +51,4 @@ extension PitchSessionData {
             rating: rating
         )
     }
-} 
+}

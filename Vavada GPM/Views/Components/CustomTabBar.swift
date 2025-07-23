@@ -63,4 +63,4 @@ struct CustomTabBar_Previews: PreviewProvider {
         CustomTabBar(selectedTab: .constant(0))
             .background(ColorManager.background)
     }
-} 
+}

@@ -6,4 +6,4 @@ struct GreenButtonBackgroundView: View {
             .aspectRatio(contentMode: .fill)
             .ignoresSafeArea(.all)
     }
-} 
+}

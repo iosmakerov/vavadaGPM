@@ -24,4 +24,4 @@ struct CustomButton_Previews: PreviewProvider {
         }
         .background(ColorManager.background)
     }
-} 
+}

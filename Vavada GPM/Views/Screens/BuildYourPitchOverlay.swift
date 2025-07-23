@@ -378,18 +378,18 @@ struct TextInputOverlay: View {
     let title: String
     @Binding var text: String
     let onSave: (String) -> Void
-    
+
     private func generateRandomText() {
         let templates = [
             "Our innovative solution addresses the critical problem of inefficient processes in modern business environments.",
-            "We are revolutionizing the industry by leveraging cutting-edge technology to deliver unprecedented value to our customers.", 
+            "We are revolutionizing the industry by leveraging cutting-edge technology to deliver unprecedented value to our customers.",
             "Through strategic partnerships and data-driven insights, we are creating a sustainable competitive advantage in the marketplace.",
             "Our platform combines artificial intelligence with human expertise to solve complex challenges that have plagued businesses for decades.",
             "By streamlining operations and reducing costs, we enable organizations to focus on what matters most - growth and innovation."
         ]
         text = templates.randomElement() ?? templates[0]
     }
-    
+
     var body: some View {
         ZStack {
             Color.black.opacity(0.8)
@@ -420,7 +420,7 @@ struct TextInputOverlay: View {
                                     .stroke(ColorManager.primaryRed, lineWidth: 2)
                             )
                     )
-                    
+
                     Button("OK") {
                         onSave(text)
                         isPresented = false
@@ -447,4 +447,4 @@ struct BuildYourPitchOverlay_Previews: PreviewProvider {
     static var previews: some View {
         BuildYourPitchOverlay(isPresented: .constant(true), onBackToMainMenu: nil)
     }
-} 
+}

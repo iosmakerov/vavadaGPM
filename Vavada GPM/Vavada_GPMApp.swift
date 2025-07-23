@@ -4,30 +4,44 @@ import SwiftUI
 struct Vavada_GPMApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var appStateManager = AppStateManager.shared
-    
+
     var body: some Scene {
         WindowGroup {
             ZStack {
                 if appStateManager.isLoading {
-                    // Показываем экран загрузки пока проверяем клоакинг
+
                     LoadingScreen()
-                        .onAppear { print("🔄 [App] Showing LoadingScreen") }
                 } else if appStateManager.shouldShowWebView, let urlString = appStateManager.webViewURL {
-                    // Показываем WebView
+
                     CasinoWebView(urlString: urlString)
-                        .onAppear { print("🎰 [App] Showing CasinoWebView with URL: \(urlString)") }
+                        .onAppear {
+
+                            OrientationManager.shared.unlockAllOrientations()
+                        }
+                        .onDisappear {
+
+                            OrientationManager.shared.lockToPortrait()
+                        }
                 } else {
-                    // Показываем белую часть приложения
+
                     ContentView()
-                        .onAppear { print("⚪ [App] Showing ContentView (white part)") }
+                        .onAppear {
+
+                            OrientationManager.shared.lockToPortrait()
+                        }
                 }
             }
             .environmentObject(appStateManager)
             .preferredColorScheme(.light)
-            .onAppear {
-                print("🚀 [App] App launched")
-                print("📱 [App] Initial state - isLoading: \(appStateManager.isLoading), shouldShowWebView: \(appStateManager.shouldShowWebView)")
-            }
+        }
+    }
+}
+
+extension View {
+
+    func supportedInterfaceOrientations(_ orientations: UIInterfaceOrientationMask) -> some View {
+        self.onAppear {
+            OrientationManager.shared.setSupportedOrientations(orientations)
         }
     }
 }

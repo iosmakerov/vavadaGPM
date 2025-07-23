@@ -7,7 +7,7 @@ enum AppState {
 
 struct ContentView: View {
     @State private var appState: AppState = .loading
-    
+
     var body: some View {
         Group {
             switch appState {
@@ -25,9 +25,9 @@ struct ContentView: View {
             GameDataService.shared.recordAppLaunch()
         }
     }
-    
+
     private func showGameApp() async {
-        try? await Task.sleep(nanoseconds: 1_500_000_000) 
+        try? await Task.sleep(nanoseconds: 1_500_000_000)
         await MainActor.run {
             appState = .stubApp
         }

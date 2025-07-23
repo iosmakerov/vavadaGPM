@@ -62,7 +62,7 @@ class GameDataService: ObservableObject {
     }
     private enum Keys {
         static let lobbies = "game_lobbies"
-        static let pitchHistory = "pitch_history" 
+        static let pitchHistory = "pitch_history"
         static let marketState = "market_state"
         static let appLaunchCount = "app_launch_count"
         static let lastLaunchDate = "last_launch_date"
@@ -243,4 +243,4 @@ extension String {
     var isNumber: Bool {
         return !isEmpty && allSatisfy { $0.isNumber }
     }
-} 
+}

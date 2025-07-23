@@ -1,96 +1,99 @@
 import SwiftUI
 
-/// Главный View для отображения WebView с тулбаром
 struct CasinoWebView: View {
     let urlString: String
     @Environment(\.dismiss) private var dismiss
     @State private var canGoBack = false
     @State private var canGoForward = false
     @StateObject private var webViewStore = WebViewStore()
-    
+
+    @State private var orientation = UIDevice.current.orientation
+    @State private var screenSize = CGSize.zero
+
     var body: some View {
-        ZStack {
-            // WebView
-            if let url = URL(string: urlString) {
-                CasinoWebViewRepresentable(
-                    url: url,
-                    canGoBack: $canGoBack,
-                    canGoForward: $canGoForward,
-                    webViewStore: webViewStore
-                )
-                .ignoresSafeArea()
-                .onAppear {
-                    // КРИТИЧНО: Разблокируем все ориентации для WebView
-                    print("🔄 [CasinoWebView] WebView appeared - UNLOCKING ALL ORIENTATIONS")
-                    OrientationManager.shared.unlockAllOrientations()
-                    
-                    // Логируем текущее состояние для отладки
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                        OrientationManager.shared.logCurrentState()
+        GeometryReader { geometry in
+            ZStack {
+
+                if let url = URL(string: urlString) {
+                    CasinoWebViewRepresentable(
+                        url: url,
+                        canGoBack: $canGoBack,
+                        canGoForward: $canGoForward,
+                        webViewStore: webViewStore
+                    )
+                    .ignoresSafeArea()
+                    .onAppear {
+
+                        OrientationManager.shared.unlockAllOrientations()
+
+                        screenSize = geometry.size
+
+                        NotificationCenter.default.addObserver(
+                            forName: UIApplication.willResignActiveNotification,
+                            object: nil,
+                            queue: .main
+                        ) { _ in
+                            GlobalWebViewManager.shared.forceSaveCookies()
+                            webViewStore.saveCurrentState()
+                        }
                     }
-                    
-                    // Добавляем observer для сохранения при сворачивании приложения
-                    NotificationCenter.default.addObserver(
-                        forName: UIApplication.willResignActiveNotification,
-                        object: nil,
-                        queue: .main
-                    ) { _ in
-                        print("💾 [CasinoWebView] App will resign active - FORCE SAVING COOKIES")
+                    .onDisappear {
+
                         GlobalWebViewManager.shared.forceSaveCookies()
                         webViewStore.saveCurrentState()
+
+                        NotificationCenter.default.removeObserver(
+                            self,
+                            name: UIApplication.willResignActiveNotification,
+                            object: nil
+                        )
+
+                        OrientationManager.shared.lockToPortrait()
                     }
-                }
-                .onDisappear {
-                    // КРИТИЧНО: Принудительно сохраняем куки перед закрытием
-                    print("💾 [CasinoWebView] WebView disappearing - FORCE SAVING COOKIES")
-                    GlobalWebViewManager.shared.forceSaveCookies()
-                    webViewStore.saveCurrentState()
-                    
-                    // Удаляем observer для предотвращения утечек памяти
-                    NotificationCenter.default.removeObserver(
-                        self,
-                        name: UIApplication.willResignActiveNotification,
-                        object: nil
-                    )
-                    
-                    // КРИТИЧНО: Возвращаем только портретную ориентацию
-                    print("🔄 [CasinoWebView] LOCKING TO PORTRAIT")
-                    OrientationManager.shared.lockToPortrait()
-                    
-                    // Логируем состояние после блокировки
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                        OrientationManager.shared.logCurrentState()
+                    .onChange(of: geometry.size) { newSize in
+
+                        if newSize != screenSize {
+                            screenSize = newSize
+                        }
                     }
+
+                    VStack {
+                        Spacer()
+                        bottomToolbar
+                    }
+                    .ignoresSafeArea(.keyboard)
+                } else {
+
+                    VStack {
+                        Image(systemName: "exclamationmark.triangle")
+                            .font(.system(size: 50))
+                            .foregroundColor(.red)
+                        Text("Invalid URL")
+                            .font(.title2)
+                            .padding(.top)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color.gray.opacity(0.1))
                 }
-                
-                // Нижний тулбар с навигацией
-                VStack {
-                    Spacer()
-                    bottomToolbar
-                }
-                .ignoresSafeArea(.keyboard)
-            } else {
-                // Ошибка URL
-                VStack {
-                    Image(systemName: "exclamationmark.triangle")
-                        .font(.system(size: 50))
-                        .foregroundColor(.red)
-                    Text("Invalid URL")
-                        .font(.title2)
-                        .padding(.top)
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(Color.gray.opacity(0.1))
             }
         }
-        .preferredColorScheme(.light) // Фиксируем светлую тему для WebView
+        .preferredColorScheme(.light)
+
+        .onAppear {
+            OrientationManager.shared.setSupportedOrientations(.allButUpsideDown)
+        }
+        .onDisappear {
+            OrientationManager.shared.setSupportedOrientations(.portrait)
+        }
+
+        .onReceive(NotificationCenter.default.publisher(for: UIDevice.orientationDidChangeNotification)) { _ in
+            orientation = UIDevice.current.orientation
+        }
     }
-    
-    // MARK: - Bottom Toolbar
-    
+
     private var bottomToolbar: some View {
         HStack(spacing: 0) {
-            // Кнопка назад
+
             Button(action: {
                 webViewStore.goBack()
             }) {
@@ -101,8 +104,7 @@ struct CasinoWebView: View {
             }
             .disabled(!canGoBack)
             .frame(maxWidth: .infinity)
-            
-            // Кнопка вперед
+
             Button(action: {
                 webViewStore.goForward()
             }) {
@@ -127,10 +129,8 @@ struct CasinoWebView: View {
     }
 }
 
-// MARK: - Preview
-
 struct CasinoWebView_Previews: PreviewProvider {
     static var previews: some View {
         CasinoWebView(urlString: "https://www.google.com")
     }
-} 
+}

@@ -75,7 +75,7 @@ struct AiSimulatorOverlay: View {
                                     .fontWeight(.heavy)
                             }
                         }
-                        .frame(width: 140, height: 60) 
+                        .frame(width: 140, height: 60)
                     }
                     .padding(.bottom, 4)
                     Button(action: {
@@ -122,7 +122,7 @@ struct AiSimulatorOverlay: View {
         }
         .overlay(
             showDrawLogo ? DrawLogoOverlay(
-                isPresented: $showDrawLogo, 
+                isPresented: $showDrawLogo,
                 onBackToMainMenu: {
                     isPresented = false
                 }
@@ -136,6 +136,6 @@ struct AiSimulatorOverlay: View {
 struct AiSimulatorOverlay_Previews: PreviewProvider {
     static var previews: some View {
         AiSimulatorOverlay(isPresented: .constant(true))
-            .background(Color.gray) 
+            .background(Color.gray)
     }
-} 
+}

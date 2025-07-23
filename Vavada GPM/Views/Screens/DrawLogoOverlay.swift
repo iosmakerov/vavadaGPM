@@ -174,7 +174,7 @@ struct DrawLogoOverlay: View {
         }
         .overlay(
             showBuildPitch ? BuildYourPitchOverlay(
-                isPresented: $showBuildPitch, 
+                isPresented: $showBuildPitch,
                 onBackToMainMenu: onBackToMainMenu
             ) : nil
         )
@@ -201,6 +201,6 @@ struct DrawLogoOverlay: View {
 struct DrawLogoOverlay_Previews: PreviewProvider {
     static var previews: some View {
         DrawLogoOverlay(isPresented: .constant(true), onBackToMainMenu: nil)
-            .background(Color.gray) 
+            .background(Color.gray)
     }
-} 
+}

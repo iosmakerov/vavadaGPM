@@ -57,4 +57,4 @@ struct AiSimulatorLoadingOverlay: View {
             onComplete()
         }
     }
-} 
+}

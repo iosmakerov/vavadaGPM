@@ -51,4 +51,4 @@ struct CoinItemView_Previews: PreviewProvider {
         CoinItemView(coin: CoinItem.sampleData[0])
             .background(ColorManager.background)
     }
-} 
+}

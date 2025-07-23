@@ -12,4 +12,4 @@ struct ButtonBackgroundView_Previews: PreviewProvider {
             .frame(height: 60)
             .clipShape(RoundedRectangle(cornerRadius: 27))
     }
-} 
+}

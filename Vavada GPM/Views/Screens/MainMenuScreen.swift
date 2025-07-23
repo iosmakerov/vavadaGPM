@@ -113,4 +113,4 @@ struct MainMenuScreen_Previews: PreviewProvider {
     static var previews: some View {
         MainMenuScreen()
     }
-} 
+}
