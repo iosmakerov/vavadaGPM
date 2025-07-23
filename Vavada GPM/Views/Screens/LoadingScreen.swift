@@ -1,27 +1,19 @@
 import SwiftUI
-
 struct LoadingScreen: View {
     @State private var isAnimating = false
-    @State private var loadingText = "Загрузка..."
+    @State private var loadingText = "Loading..."
     @State private var dots = ""
-    
     var body: some View {
         ZStack {
-            // Простой фон как на главном экране
             ColorManager.background
                 .ignoresSafeArea(.all)
-            
             VStack(spacing: 30) {
                 Spacer()
-                
-                // Логотип или основной элемент (если есть в Assets)
                 VStack(spacing: 20) {
-                    // Кастомный индикатор загрузки
                     ZStack {
                         Circle()
                             .stroke(ColorManager.primaryRed.opacity(0.3), lineWidth: 4)
                             .frame(width: 60, height: 60)
-                        
                         Circle()
                             .trim(from: 0, to: 0.8)
                             .stroke(
@@ -35,23 +27,16 @@ struct LoadingScreen: View {
                                 value: isAnimating
                             )
                     }
-                    
-                    // Анимированный текст загрузки
                     Text(loadingText + dots)
                         .font(FontManager.body)
                         .foregroundColor(ColorManager.white)
                         .multilineTextAlignment(.center)
                 }
-                
                 Spacer()
-                
-                // Дополнительная информация внизу экрана
                 VStack(spacing: 8) {
-                    Text("Подготавливаем контент...")
+                    Text("Preparing content...")
                         .font(FontManager.caption)
                         .foregroundColor(ColorManager.textSecondary)
-                    
-                    // Прогресс-индикатор в стиле приложения
                     Rectangle()
                         .frame(height: 2)
                         .foregroundColor(ColorManager.primaryRed.opacity(0.3))
@@ -74,12 +59,8 @@ struct LoadingScreen: View {
             startAnimations()
         }
     }
-    
     private func startAnimations() {
-        // Запускаем вращение индикатора
         isAnimating = true
-        
-        // Анимация точек в тексте
         Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { _ in
             withAnimation(.easeInOut(duration: 0.3)) {
                 switch dots {
@@ -96,7 +77,6 @@ struct LoadingScreen: View {
         }
     }
 }
-
 #Preview {
     LoadingScreen()
 } 

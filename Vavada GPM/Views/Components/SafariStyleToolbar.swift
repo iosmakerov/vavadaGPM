@@ -1,26 +1,21 @@
 import SwiftUI
-
 struct SafariStyleToolbar: View {
     let onBackTapped: () -> Void
     let title: String
     let isLoading: Bool
-    
-    init(title: String = "Загрузка...", isLoading: Bool = false, onBackTapped: @escaping () -> Void) {
+    init(title: String = "Loading...", isLoading: Bool = false, onBackTapped: @escaping () -> Void) {
         self.title = title
         self.isLoading = isLoading
         self.onBackTapped = onBackTapped
     }
-    
     var body: some View {
         HStack(spacing: 0) {
-            // Кнопка "Назад" в стиле Safari
             Button(action: onBackTapped) {
                 HStack(spacing: 6) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 16, weight: .medium))
                         .foregroundColor(ColorManager.primaryRed)
-                    
-                    Text("Назад")
+                    Text("Back")
                         .font(.system(size: 16, weight: .regular))
                         .foregroundColor(ColorManager.primaryRed)
                 }
@@ -28,17 +23,13 @@ struct SafariStyleToolbar: View {
                 .padding(.vertical, 8)
             }
             .buttonStyle(PlainButtonStyle())
-            
             Spacer()
-            
-            // Заголовок по центру
             HStack(spacing: 8) {
                 if isLoading {
                     ProgressView()
                         .scaleEffect(0.8)
                         .progressViewStyle(CircularProgressViewStyle(tint: ColorManager.white))
                 }
-                
                 Text(title)
                     .font(.system(size: 16, weight: .medium))
                     .foregroundColor(ColorManager.white)
@@ -46,14 +37,10 @@ struct SafariStyleToolbar: View {
                     .truncationMode(.middle)
             }
             .frame(maxWidth: .infinity)
-            
             Spacer()
-            
-            // Placeholder для симметрии (как кнопка назад)
             HStack {
-                // Пустое место для центровки заголовка
             }
-            .frame(width: 70) // Примерная ширина кнопки "Назад"
+            .frame(width: 70) 
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
@@ -68,7 +55,6 @@ struct SafariStyleToolbar: View {
             )
         )
         .overlay(
-            // Нижняя граница
             Rectangle()
                 .frame(height: 0.5)
                 .foregroundColor(Color.white.opacity(0.2)),
@@ -76,7 +62,6 @@ struct SafariStyleToolbar: View {
         )
     }
 }
-
 #Preview {
     VStack(spacing: 0) {
         SafariStyleToolbar(
@@ -85,12 +70,10 @@ struct SafariStyleToolbar: View {
         ) {
             print("Back tapped")
         }
-        
         Rectangle()
             .foregroundColor(.gray)
-        
         SafariStyleToolbar(
-            title: "Загрузка страницы...",
+            title: "Loading page...",
             isLoading: true
         ) {
             print("Back tapped")

@@ -1,12 +1,10 @@
 import Foundation
-
 struct CoinItem: Identifiable {
     let id = UUID()
     let name: String
     let imageName: String
     let value: Int
     let isPositive: Bool
-    
     static let sampleData: [CoinItem] = [
         CoinItem(name: "SnoutCoin", imageName: "coin_snout", value: 2, isPositive: true),
         CoinItem(name: "Bacon Bucks", imageName: "coin_bacon", value: 3, isPositive: false),

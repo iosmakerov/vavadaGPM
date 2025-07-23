@@ -1,7 +1,5 @@
 import SwiftUI
-
 struct ColorManager {
-    // Основные цвета из дизайна
     static let background = Color(hex: "#171925")
     static let primaryRed = Color(hex: "#FE2948")
     static let secondaryRed = Color(hex: "#BF1D34")
@@ -11,21 +9,17 @@ struct ColorManager {
     static let gradientPurple2 = Color(hex: "#262233")
     static let textSecondary = Color(hex: "#BEB7C9")
     static let tabBackground = Color(hex: "#9D3C4A")
-    
-    // Градиенты
     static let buttonGradient = LinearGradient(
         colors: [primaryRed, secondaryRed],
         startPoint: .leading,
         endPoint: .trailing
     )
-    
     static let tabBarGradient = LinearGradient(
         colors: [gradientPurple1, gradientPurple2],
         startPoint: .topLeading,
         endPoint: .bottomTrailing
     )
 }
-
 extension Color {
     init(hex: String) {
         let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
@@ -42,7 +36,6 @@ extension Color {
         default:
             (a, r, g, b) = (1, 1, 1, 0)
         }
-        
         self.init(
             .sRGB,
             red: Double(r) / 255,

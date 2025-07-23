@@ -1,16 +1,7 @@
-//
-//  ContentView.swift
-//  Vavada GPM
-//
-//  Created by Anton Makerov on 18.07.2025.
-//
-
 import SwiftUI
-
 struct ContentView: View {
     @State private var appState: AppState = .loading
     @StateObject private var cloakingService = CloakingService()
-    
     var body: some View {
         Group {
             switch appState {
@@ -19,34 +10,27 @@ struct ContentView: View {
                     .task {
                         await performCloakingCheck()
                     }
-                
             case .webView(let url):
                 WebViewScreen(url: url, appState: $appState)
-                
             case .stubApp:
                 TabContainerView()
             }
         }
         .animation(.easeInOut(duration: 0.3), value: appState)
         .onAppear {
-            // Записываем статистику запуска приложения для App Store
             GameDataService.shared.recordAppLaunch()
         }
     }
-    
     private func performCloakingCheck() async {
         do {
-            // Минимальная задержка для показа индикатора загрузки (только в продакшене)
             #if DEBUG
             if !CloakingConstants.skipLoadingDelay {
-                try await Task.sleep(nanoseconds: 1_500_000_000) // 1.5 секунды
+                try await Task.sleep(nanoseconds: 1_500_000_000) 
             }
             #else
-            try await Task.sleep(nanoseconds: 1_500_000_000) // 1.5 секунды
+            try await Task.sleep(nanoseconds: 1_500_000_000) 
             #endif
-            
             let result = await cloakingService.checkAccess()
-            
             await MainActor.run {
                 switch result {
                 case .showWebView(let url):
@@ -63,7 +47,6 @@ struct ContentView: View {
         }
     }
 }
-
 #Preview {
     ContentView()
 }

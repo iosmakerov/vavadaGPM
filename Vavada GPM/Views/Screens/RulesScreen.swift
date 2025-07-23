@@ -1,9 +1,7 @@
 import SwiftUI
-
 struct RulesScreen: View {
     var body: some View {
         VStack(spacing: 0) {
-            // Заголовок RULES
             VStack {
                 Text("RULES")
                     .font(FontManager.title)
@@ -18,35 +16,25 @@ struct RulesScreen: View {
             )
             .padding(.horizontal, 20)
             .padding(.top, 30)
-            
-            // Основной контент с правилами игры
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    
                     Text("🐷 Viral Ventures")
                         .font(.system(size: 18, weight: .bold))
                         .foregroundColor(ColorManager.primaryRed)
-                    
                     Text("A ridiculous tabletop game of fake ideas and very questionable investors.")
                         .font(FontManager.body)
                         .foregroundColor(ColorManager.white)
-                    
-                    // OBJECTIVE
                     Text("🎯 OBJECTIVE")
                         .font(.system(size: 16, weight: .bold))
                         .foregroundColor(ColorManager.primaryRed)
                         .padding(.top, 16)
-                    
                     Text("You are a pig with a pitch and a dream. Your goal is to build the funniest, trendiest, or most investor-bait startup and win the most Investor Confidence Points (ICP) before the final round.")
                         .font(FontManager.body)
                         .foregroundColor(ColorManager.white)
-                    
-                    // PLAYERS
                     Text("👥 PLAYERS")
                         .font(.system(size: 16, weight: .bold))
                         .foregroundColor(ColorManager.primaryRed)
                         .padding(.top, 16)
-                    
                     VStack(alignment: .leading, spacing: 4) {
                         Text("3–5 aspiring piggy CEOs")
                         Text("Ages 13+")
@@ -55,17 +43,13 @@ struct RulesScreen: View {
                     }
                     .font(FontManager.body)
                     .foregroundColor(ColorManager.white)
-                    
-                    // COMPANION APP
                     Text("📱 COMPANION APP")
                         .font(.system(size: 16, weight: .bold))
                         .foregroundColor(ColorManager.primaryRed)
                         .padding(.top, 16)
-                    
                     Text("The free Viral Ventures App helps run the game:")
                         .font(FontManager.body)
                         .foregroundColor(ColorManager.white)
-                    
                     VStack(alignment: .leading, spacing: 4) {
                         Text("• Generates startup names")
                         Text("• Handles pitch steps and logo drawing")
@@ -75,17 +59,13 @@ struct RulesScreen: View {
                     }
                     .font(FontManager.body)
                     .foregroundColor(ColorManager.white)
-                    
-                    // GAME SETUP
                     Text("🧩 GAME SETUP")
                         .font(.system(size: 16, weight: .bold))
                         .foregroundColor(ColorManager.primaryRed)
                         .padding(.top, 16)
-                    
                     Text("Each player receives:")
                         .font(FontManager.body)
                         .foregroundColor(ColorManager.white)
-                    
                     VStack(alignment: .leading, spacing: 4) {
                         Text("• 1 Piggy CEO Board")
                         Text("• 3 Coins")
@@ -94,12 +74,10 @@ struct RulesScreen: View {
                     }
                     .font(FontManager.body)
                     .foregroundColor(ColorManager.white)
-                    
                     Text("App Setup:")
                         .font(FontManager.body)
                         .foregroundColor(ColorManager.white)
                         .padding(.top, 8)
-                    
                     VStack(alignment: .leading, spacing: 4) {
                         Text("• Choose Lobby Mode for multiplayer")
                         Text("• Select player count")
@@ -108,17 +86,13 @@ struct RulesScreen: View {
                     }
                     .font(FontManager.body)
                     .foregroundColor(ColorManager.white)
-                    
-                    // GAMEPLAY OVERVIEW
                     Text("🔁 GAMEPLAY OVERVIEW")
                         .font(.system(size: 16, weight: .bold))
                         .foregroundColor(ColorManager.primaryRed)
                         .padding(.top, 16)
-                    
                     Text("Each game has 6 rounds. Each round follows these phases:")
                         .font(FontManager.body)
                         .foregroundColor(ColorManager.white)
-                    
                     VStack(alignment: .leading, spacing: 12) {
                         VStack(alignment: .leading, spacing: 4) {
                             Text("🐽 1. BUILD YOUR STARTUP (App Phase)")
@@ -129,7 +103,6 @@ struct RulesScreen: View {
                             Text("• Draw a Logo using the in-app finger canvas")
                             Text("• Build Your Pitch using pre-written options (or type your own)")
                         }
-                        
                         VStack(alignment: .leading, spacing: 4) {
                             Text("🎤 2. PITCH TIME")
                                 .font(.system(size: 14, weight: .bold))
@@ -138,7 +111,6 @@ struct RulesScreen: View {
                             Text("✅ The winner earns 2 ICP, runner-up earns 1 ICP, others earn 0")
                             Text("✅ In case of tie, both tied players earn full points")
                         }
-                        
                         VStack(alignment: .leading, spacing: 4) {
                             Text("💼 3. ACTION PHASE")
                                 .font(.system(size: 14, weight: .bold))
@@ -150,7 +122,6 @@ struct RulesScreen: View {
                             Text("• Steal Investor – Steal 1 ICP from the leader")
                             Text("Discard after use.")
                         }
-                        
                         VStack(alignment: .leading, spacing: 4) {
                             Text("📉 4. MARKET EVENT")
                                 .font(.system(size: 14, weight: .bold))
@@ -159,7 +130,6 @@ struct RulesScreen: View {
                             Text("This may cause market crashes, trend reversals, or bonus sectors.")
                             Text("Adapt accordingly!")
                         }
-                        
                         VStack(alignment: .leading, spacing: 4) {
                             Text("💸 5. FUNDING ROUND")
                                 .font(.system(size: 14, weight: .bold))
@@ -170,13 +140,10 @@ struct RulesScreen: View {
                     }
                     .font(FontManager.body)
                     .foregroundColor(ColorManager.white)
-                    
-                    // ENDGAME
                     Text("🏁 ENDGAME: ROUND 6")
                         .font(.system(size: 16, weight: .bold))
                         .foregroundColor(ColorManager.primaryRed)
                         .padding(.top, 16)
-                    
                     VStack(alignment: .leading, spacing: 4) {
                         Text("After the final Market Event, tally:")
                         Text("• ICP (Investor Confidence Points)")
@@ -187,13 +154,10 @@ struct RulesScreen: View {
                     }
                     .font(FontManager.body)
                     .foregroundColor(ColorManager.white)
-                    
-                    // FAQ
                     Text("🤔 FREQUENTLY OINKED QUESTIONS")
                         .font(.system(size: 16, weight: .bold))
                         .foregroundColor(ColorManager.primaryRed)
                         .padding(.top, 16)
-                    
                     VStack(alignment: .leading, spacing: 8) {
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Q: Can I just use buzzwords to win the pitch?")
@@ -203,7 +167,6 @@ struct RulesScreen: View {
                                 .font(FontManager.body)
                                 .foregroundColor(ColorManager.white)
                         }
-                        
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Q: What if someone doesn't want to draw a logo?")
                                 .font(.system(size: 14, weight: .bold))
@@ -212,7 +175,6 @@ struct RulesScreen: View {
                                 .font(FontManager.body)
                                 .foregroundColor(ColorManager.white)
                         }
-                        
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Q: Can I trade ICP or coins?")
                                 .font(.system(size: 14, weight: .bold))
@@ -240,7 +202,6 @@ struct RulesScreen: View {
         )
     }
 }
-
 struct RulesScreen_Previews: PreviewProvider {
     static var previews: some View {
         RulesScreen()

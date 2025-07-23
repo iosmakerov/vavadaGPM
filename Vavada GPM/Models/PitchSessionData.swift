@@ -1,6 +1,4 @@
 import Foundation
-
-// MARK: - Pitch Session Data
 struct PitchSessionData {
     let startupName: String
     let logoCreated: Bool
@@ -12,24 +10,18 @@ struct PitchSessionData {
     let whyNow2: String
     let callToAction1: String
     let callToAction2: String
-    
-    // Computed properties для удобства
     var primaryProblemStatement: String {
         return !problemStatement1.isEmpty ? problemStatement1 : problemStatement2
     }
-    
     var primarySolution: String {
         return !ourSolution1.isEmpty ? ourSolution1 : ourSolution2
     }
-    
     var primaryWhyNow: String {
         return !whyNow1.isEmpty ? whyNow1 : whyNow2
     }
-    
     var primaryCallToAction: String {
         return !callToAction1.isEmpty ? callToAction1 : callToAction2
     }
-    
     var isComplete: Bool {
         return !startupName.isEmpty &&
                (!problemStatement1.isEmpty || !problemStatement2.isEmpty) &&
@@ -37,25 +29,17 @@ struct PitchSessionData {
                (!whyNow1.isEmpty || !whyNow2.isEmpty) &&
                (!callToAction1.isEmpty || !callToAction2.isEmpty)
     }
-    
     var completionScore: Double {
         var score: Double = 0
         let maxScore: Double = 10
-        
-        // Startup name (2 points)
         if !startupName.isEmpty { score += 2 }
-        
-        // Each section (2 points each)
         if !primaryProblemStatement.isEmpty { score += 2 }
         if !primarySolution.isEmpty { score += 2 }
         if !primaryWhyNow.isEmpty { score += 2 }
         if !primaryCallToAction.isEmpty { score += 2 }
-        
         return min(score / maxScore, 1.0)
     }
 }
-
-// MARK: - Extensions for GameDataService integration
 extension PitchSessionData {
     func toPitchHistory(rating: Int) -> PitchHistory {
         return PitchHistory(

@@ -1,5 +1,4 @@
 import SwiftUI
-
 struct GreenButtonBackgroundView: View {
     var body: some View {
         Image("green_btn")

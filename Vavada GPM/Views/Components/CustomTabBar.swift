@@ -1,8 +1,6 @@
 import SwiftUI
-
 struct CustomTabBar: View {
     @Binding var selectedTab: Int
-    
     var body: some View {
         HStack(spacing: 0) {
             TabBarItem(
@@ -12,7 +10,6 @@ struct CustomTabBar: View {
             ) {
                 selectedTab = 0
             }
-            
             TabBarItem(
                 imageName: "tab_icon_1",
                 isSelected: selectedTab == 1,
@@ -20,7 +17,6 @@ struct CustomTabBar: View {
             ) {
                 selectedTab = 1
             }
-            
             TabBarItem(
                 imageName: "tab_icon_2",
                 isSelected: selectedTab == 2,
@@ -28,7 +24,6 @@ struct CustomTabBar: View {
             ) {
                 selectedTab = 2
             }
-            
             TabBarItem(
                 imageName: "tab_icon_3",
                 isSelected: selectedTab == 3,
@@ -46,13 +41,11 @@ struct CustomTabBar: View {
         .ignoresSafeArea(.keyboard)
     }
 }
-
 struct TabBarItem: View {
     let imageName: String
     let isSelected: Bool
     let index: Int
     let action: () -> Void
-    
     var body: some View {
         Button(action: action) {
             Image(imageName)
@@ -65,7 +58,6 @@ struct TabBarItem: View {
         .contentShape(Rectangle())
     }
 }
-
 struct CustomTabBar_Previews: PreviewProvider {
     static var previews: some View {
         CustomTabBar(selectedTab: .constant(0))

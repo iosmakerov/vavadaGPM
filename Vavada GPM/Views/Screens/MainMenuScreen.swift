@@ -1,13 +1,10 @@
 import SwiftUI
-
 struct MainMenuScreen: View {
     @State private var showCreateLobby = false
     @State private var showJoinLobby = false
     @State private var showAiSimulator = false
-    
     var body: some View {
         VStack(spacing: 0) {
-            // Верхняя часть с заголовком (контент остается как был)
             VStack {
                 Spacer()
                 Text("NAME")
@@ -19,7 +16,6 @@ struct MainMenuScreen: View {
             }
             .frame(height: 200)
             .background(
-                // Независимый фон - баннер с монетами
                 Image("banner_coins-21e14d")
                     .resizable()
                     .aspectRatio(contentMode: .fill)
@@ -35,47 +31,37 @@ struct MainMenuScreen: View {
                         )
                     )
             )
-            
-            // Кнопки с компактными фонами
             VStack(spacing: 32) {
-                // Кнопка 1 - компактный фон
                                     CustomButton(title: "CREATE LOBBY") {
                         showCreateLobby = true
                     }
                 .padding(.horizontal, 32)
                 .padding(.vertical, 16)
                 .background(
-                    // Компактный независимый фон
                     Image("gb_for_button_mainscreen")
                         .resizable()
                         .aspectRatio(contentMode: .fill)
                         .clipShape(RoundedRectangle(cornerRadius: 16))
                 )
                 .padding(.horizontal, 16)
-                
-                // Кнопка 2 - компактный фон
                 CustomButton(title: "JOIN THE LOBBY") {
                     showJoinLobby = true
                 }
                 .padding(.horizontal, 32)
                 .padding(.vertical, 16)
                 .background(
-                    // Компактный независимый фон
                     Image("gb_for_button_mainscreen")
                         .resizable()
                         .aspectRatio(contentMode: .fill)
                         .clipShape(RoundedRectangle(cornerRadius: 16))
                 )
                 .padding(.horizontal, 16)
-                
-                // Кнопка 3 - компактный фон
                 CustomButton(title: "AI SIMULATOR") {
                     showAiSimulator = true
                 }
                 .padding(.horizontal, 32)
                 .padding(.vertical, 16)
                 .background(
-                    // Компактный независимый фон
                     Image("gb_for_button_mainscreen")
                         .resizable()
                         .aspectRatio(contentMode: .fill)
@@ -85,29 +71,23 @@ struct MainMenuScreen: View {
             }
             .padding(.top, 80)
             .padding(.bottom, 32)
-            
             Spacer()
         }
         .background(
-            // Общий фон как на заглушках - независимый
             ColorManager.background
                 .ignoresSafeArea(.all)
         )
         .overlay(
-            // Модальное окно Create Lobby
             showCreateLobby ? CreateLobbyOverlay(isPresented: $showCreateLobby) : nil
         )
         .overlay(
-            // Модальное окно Join Lobby
             showJoinLobby ? JoinLobbyOverlay(isPresented: $showJoinLobby) : nil
         )
         .overlay(
-            // Модальное окно AI Simulator
             showAiSimulator ? AiSimulatorOverlay(isPresented: $showAiSimulator) : nil
         )
     }
 }
-
 extension Text {
     func stroke(lineWidth: CGFloat) -> some View {
         self
@@ -129,7 +109,6 @@ extension Text {
             )
     }
 }
-
 struct MainMenuScreen_Previews: PreviewProvider {
     static var previews: some View {
         MainMenuScreen()

@@ -1,5 +1,4 @@
 import SwiftUI
-
 struct ButtonBackgroundView: View {
     var body: some View {
         Image("button_bg")
@@ -7,7 +6,6 @@ struct ButtonBackgroundView: View {
             .aspectRatio(contentMode: .fill)
     }
 }
-
 struct ButtonBackgroundView_Previews: PreviewProvider {
     static var previews: some View {
         ButtonBackgroundView()
