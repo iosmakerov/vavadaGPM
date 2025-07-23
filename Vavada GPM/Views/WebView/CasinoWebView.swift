@@ -20,13 +20,13 @@ struct CasinoWebView: View {
                 )
                 .ignoresSafeArea()
                 .onAppear {
-                    // Разблокируем все ориентации для WebView
-                    print("🔄 [CasinoWebView] WebView appeared, unlocking all orientations")
+                    // КРИТИЧНО: Разблокируем все ориентации для WebView
+                    print("🔄 [CasinoWebView] WebView appeared - UNLOCKING ALL ORIENTATIONS")
                     OrientationManager.shared.unlockAllOrientations()
                     
-                    // Добавляем задержку перед принудительным обновлением
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                        self.forceOrientationUpdate()
+                    // Логируем текущее состояние для отладки
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        OrientationManager.shared.logCurrentState()
                     }
                     
                     // Добавляем observer для сохранения при сворачивании приложения
@@ -35,13 +35,15 @@ struct CasinoWebView: View {
                         object: nil,
                         queue: .main
                     ) { _ in
-                        print("💾 [CasinoWebView] App will resign active - saving WebView state")
+                        print("💾 [CasinoWebView] App will resign active - FORCE SAVING COOKIES")
+                        GlobalWebViewManager.shared.forceSaveCookies()
                         webViewStore.saveCurrentState()
                     }
                 }
                 .onDisappear {
-                    // Сохраняем состояние WebView перед закрытием
-                    print("💾 [CasinoWebView] WebView disappearing, saving state")
+                    // КРИТИЧНО: Принудительно сохраняем куки перед закрытием
+                    print("💾 [CasinoWebView] WebView disappearing - FORCE SAVING COOKIES")
+                    GlobalWebViewManager.shared.forceSaveCookies()
                     webViewStore.saveCurrentState()
                     
                     // Удаляем observer для предотвращения утечек памяти
@@ -51,9 +53,14 @@ struct CasinoWebView: View {
                         object: nil
                     )
                     
-                    // Возвращаем только портретную ориентацию
-                    print("🔄 [CasinoWebView] Locking to portrait")
+                    // КРИТИЧНО: Возвращаем только портретную ориентацию
+                    print("🔄 [CasinoWebView] LOCKING TO PORTRAIT")
                     OrientationManager.shared.lockToPortrait()
+                    
+                    // Логируем состояние после блокировки
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        OrientationManager.shared.logCurrentState()
+                    }
                 }
                 
                 // Нижний тулбар с навигацией
@@ -117,25 +124,6 @@ struct CasinoWebView: View {
                     alignment: .top
                 )
         )
-    }
-    
-    // MARK: - Helper Methods
-    
-    private func forceOrientationUpdate() {
-        print("🔄 [CasinoWebView] Force updating orientation")
-        
-        // Принудительное обновление через NotificationCenter
-        NotificationCenter.default.post(name: UIDevice.orientationDidChangeNotification, object: nil)
-        
-        // Дополнительно через UIDevice для iOS 15
-        if #available(iOS 16.0, *) {
-            // Уже обработано в OrientationManager
-        } else {
-            UIDevice.current.setValue(UIInterfaceOrientation.unknown.rawValue, forKey: "orientation")
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                UIDevice.current.setValue(UIInterfaceOrientation.portrait.rawValue, forKey: "orientation")
-            }
-        }
     }
 }
 

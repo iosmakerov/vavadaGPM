@@ -18,12 +18,16 @@ class WebViewStore: ObservableObject {
     }
     
     func saveCurrentState() {
-        guard let webView = webView else { return }
-        print("💾 [WebViewStore] Saving WebView state...")
+        print("💾 [WebViewStore] Triggering GLOBAL cookie save...")
         
-        // Принудительно сохраняем куки
-        webView.configuration.websiteDataStore.httpCookieStore.getAllCookies { cookies in
-            print("💾 [WebViewStore] Found \(cookies.count) cookies to save")
+        // Используем глобальный менеджер для принудительного сохранения куки
+        GlobalWebViewManager.shared.forceSaveCookies()
+        
+        // Дополнительное сохранение через текущий WebView если есть
+        if let webView = webView {
+            webView.configuration.websiteDataStore.httpCookieStore.getAllCookies { cookies in
+                print("💾 [WebViewStore] Current WebView has \(cookies.count) cookies - they are auto-saved by GlobalWebViewManager")
+            }
         }
     }
 } 

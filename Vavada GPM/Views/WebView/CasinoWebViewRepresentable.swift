@@ -1,12 +1,78 @@
 import SwiftUI
 import WebKit
 
-/// UIViewRepresentable обертка для WKWebView с настройками для казино
-struct CasinoWebViewRepresentable: UIViewRepresentable {
-    // Статический процесс пул и dataStore для сохранения сессии между запусками
-    static let sharedProcessPool = WKProcessPool()
-    static let persistentDataStore = WKWebsiteDataStore.default()
+/// ГЛОБАЛЬНЫЙ СИНГЛТОН для сохранения WebView и куки между перезапусками
+class GlobalWebViewManager: ObservableObject {
+    static let shared = GlobalWebViewManager()
     
+    private var _webView: WKWebView?
+    private let processPool = WKProcessPool()
+    
+    private init() {}
+    
+    func getWebView() -> WKWebView {
+        if let existingWebView = _webView {
+            print("🔄 [GlobalWebViewManager] Reusing existing WebView with saved cookies")
+            return existingWebView
+        }
+        
+        print("🔄 [GlobalWebViewManager] Creating new WebView with persistent storage")
+        let webView = createPersistentWebView()
+        _webView = webView
+        return webView
+    }
+    
+    private func createPersistentWebView() -> WKWebView {
+        let configuration = WKWebViewConfiguration()
+        
+        // КРИТИЧНО: Используем один processPool и dataStore для всего приложения
+        configuration.processPool = processPool
+        configuration.websiteDataStore = WKWebsiteDataStore.default()
+        
+        // Настройки для казино
+        configuration.preferences.javaScriptEnabled = true
+        configuration.preferences.javaScriptCanOpenWindowsAutomatically = true
+        configuration.allowsInlineMediaPlayback = true
+        configuration.mediaTypesRequiringUserActionForPlayback = []
+        
+        if #available(iOS 14.0, *) {
+            configuration.defaultWebpagePreferences.allowsContentJavaScript = true
+        }
+        
+        configuration.suppressesIncrementalRendering = false
+        configuration.allowsPictureInPictureMediaPlayback = true
+        configuration.applicationNameForUserAgent = "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1"
+        
+        let webView = WKWebView(frame: .zero, configuration: configuration)
+        webView.allowsBackForwardNavigationGestures = true
+        webView.scrollView.isScrollEnabled = true
+        webView.scrollView.bounces = true
+        
+        return webView
+    }
+    
+    func loadURL(_ url: URL) {
+        let webView = getWebView()
+        let request = URLRequest(url: url)
+        webView.load(request)
+    }
+    
+    func forceSaveCookies() {
+        guard let webView = _webView else { return }
+        
+        // Принудительно сохраняем все куки в HTTPCookieStorage
+        webView.configuration.websiteDataStore.httpCookieStore.getAllCookies { cookies in
+            print("💾 [GlobalWebViewManager] Force saving \(cookies.count) cookies to HTTPCookieStorage")
+            
+            for cookie in cookies {
+                HTTPCookieStorage.shared.setCookie(cookie)
+            }
+        }
+    }
+}
+
+/// UIViewRepresentable обертка для глобального WebView
+struct CasinoWebViewRepresentable: UIViewRepresentable {
     let url: URL
     @Binding var canGoBack: Bool
     @Binding var canGoForward: Bool
@@ -17,22 +83,14 @@ struct CasinoWebViewRepresentable: UIViewRepresentable {
     }
     
     func makeUIView(context: Context) -> WKWebView {
-        // Создаем конфигурацию с настройками для казино
-        let configuration = createWebViewConfiguration()
+        // Получаем ГЛОБАЛЬНЫЙ WebView
+        let webView = GlobalWebViewManager.shared.getWebView()
         
-        // Создаем WebView
-        let webView = WKWebView(frame: .zero, configuration: configuration)
         webView.navigationDelegate = context.coordinator
         webView.uiDelegate = context.coordinator
         
-        // Настройки для казино
-        webView.allowsBackForwardNavigationGestures = true
-        webView.scrollView.isScrollEnabled = true
-        webView.scrollView.bounces = true
-        
         // Загружаем URL
-        let request = URLRequest(url: url)
-        webView.load(request)
+        GlobalWebViewManager.shared.loadURL(url)
         
         // Сохраняем ссылку на WebView в координаторе
         context.coordinator.webView = webView
@@ -44,62 +102,7 @@ struct CasinoWebViewRepresentable: UIViewRepresentable {
     }
     
     func updateUIView(_ webView: WKWebView, context: Context) {
-        // Обновления не требуются
-    }
-    
-    private func createWebViewConfiguration() -> WKWebViewConfiguration {
-        print("🔧 [WebView] Creating WebView configuration with persistent storage")
-        let configuration = WKWebViewConfiguration()
-        
-        // КРИТИЧНО: Используем статические объекты для сохранения между запусками
-        configuration.websiteDataStore = Self.persistentDataStore
-        configuration.processPool = Self.sharedProcessPool
-        
-        print("🍪 [WebView] Using persistent dataStore: \(Self.persistentDataStore)")
-        print("🔄 [WebView] Using shared processPool: \(Self.sharedProcessPool)")
-        
-        // Включаем JavaScript
-        configuration.preferences.javaScriptEnabled = true
-        configuration.preferences.javaScriptCanOpenWindowsAutomatically = true
-        
-        // Настройки для правильной работы с медиа
-        configuration.allowsInlineMediaPlayback = true
-        configuration.mediaTypesRequiringUserActionForPlayback = []
-        
-        // Дополнительные настройки для казино
-        if #available(iOS 14.0, *) {
-            configuration.defaultWebpagePreferences.allowsContentJavaScript = true
-        }
-        
-        // Настройки для лучшей совместимости
-        configuration.suppressesIncrementalRendering = false
-        configuration.allowsPictureInPictureMediaPlayback = true
-        
-        // User Agent для совместимости с казино
-        configuration.applicationNameForUserAgent = "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1"
-        
-        // Включаем поддержку игровых провайдеров
-        let contentController = WKUserContentController()
-        
-        // JavaScript для оптимизации работы с казино
-        let script = """
-        // Отключаем ограничения на автовоспроизведение
-        document.addEventListener('DOMContentLoaded', function() {
-            var videos = document.querySelectorAll('video');
-            videos.forEach(function(video) {
-                video.muted = false;
-            });
-        });
-        
-        // Поддержка полноэкранного режима
-        document.documentElement.webkitRequestFullscreen = document.documentElement.webkitRequestFullscreen || document.documentElement.requestFullscreen;
-        """
-        
-        let userScript = WKUserScript(source: script, injectionTime: .atDocumentEnd, forMainFrameOnly: false)
-        contentController.addUserScript(userScript)
-        configuration.userContentController = contentController
-        
-        return configuration
+        // Обновления не требуются для глобального WebView
     }
     
     // MARK: - Coordinator
@@ -121,11 +124,11 @@ struct CasinoWebViewRepresentable: UIViewRepresentable {
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
             updateNavigationState(webView)
             
-            // Проверяем и логируем состояние куки
-            checkCookieStatus(webView)
+            // Принудительно сохраняем куки после каждой загрузки
+            GlobalWebViewManager.shared.forceSaveCookies()
             
-            // Принудительно сохраняем куки после загрузки каждой страницы
-            saveCookiesManually(webView)
+            // Логируем состояние куки для отладки
+            logCookieStatus(webView)
         }
         
         func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
@@ -149,30 +152,36 @@ struct CasinoWebViewRepresentable: UIViewRepresentable {
         
         func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping () -> Void) {
             // Обработка JavaScript alert
-            if let rootViewController = UIApplication.shared.windows.first?.rootViewController {
-                let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
-                alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in
+            DispatchQueue.main.async {
+                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                   let rootViewController = windowScene.windows.first?.rootViewController {
+                    let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
+                    alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in
+                        completionHandler()
+                    })
+                    rootViewController.present(alert, animated: true)
+                } else {
                     completionHandler()
-                })
-                rootViewController.present(alert, animated: true)
-            } else {
-                completionHandler()
+                }
             }
         }
         
         func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (Bool) -> Void) {
             // Обработка JavaScript confirm
-            if let rootViewController = UIApplication.shared.windows.first?.rootViewController {
-                let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
-                alert.addAction(UIAlertAction(title: "Cancel", style: .cancel) { _ in
+            DispatchQueue.main.async {
+                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                   let rootViewController = windowScene.windows.first?.rootViewController {
+                    let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
+                    alert.addAction(UIAlertAction(title: "Cancel", style: .cancel) { _ in
+                        completionHandler(false)
+                    })
+                    alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in
+                        completionHandler(true)
+                    })
+                    rootViewController.present(alert, animated: true)
+                } else {
                     completionHandler(false)
-                })
-                alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in
-                    completionHandler(true)
-                })
-                rootViewController.present(alert, animated: true)
-            } else {
-                completionHandler(false)
+                }
             }
         }
         
@@ -183,29 +192,12 @@ struct CasinoWebViewRepresentable: UIViewRepresentable {
             parent.canGoForward = webView.canGoForward
         }
         
-        private func checkCookieStatus(_ webView: WKWebView) {
+        private func logCookieStatus(_ webView: WKWebView) {
             webView.configuration.websiteDataStore.httpCookieStore.getAllCookies { cookies in
                 DispatchQueue.main.async {
                     print("🍪 [WebView] Current cookies count: \(cookies.count)")
-                    for cookie in cookies.prefix(5) {
-                        print("🍪 [WebView] Cookie: \(cookie.name) = \(cookie.value.prefix(20))... for domain: \(cookie.domain)")
-                    }
-                }
-            }
-        }
-        
-        private func saveCookiesManually(_ webView: WKWebView) {
-            // Принудительно синхронизируем куки с постоянным хранилищем
-            let cookieStore = webView.configuration.websiteDataStore.httpCookieStore
-            
-            // Получаем все куки и убеждаемся что они сохранены
-            cookieStore.getAllCookies { cookies in
-                print("💾 [WebView] Manually saving \(cookies.count) cookies")
-                
-                // Принудительно пересохраняем каждую куку
-                for cookie in cookies {
-                    cookieStore.setCookie(cookie) {
-                        // Куки сохранены
+                    for cookie in cookies.prefix(3) {
+                        print("🍪 [WebView] Cookie: \(cookie.name) for domain: \(cookie.domain)")
                     }
                 }
             }
