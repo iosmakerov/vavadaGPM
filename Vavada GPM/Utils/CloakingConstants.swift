@@ -6,8 +6,8 @@ struct CloakingConstants {
     
     // Настройки времени
     static let initialDelayDays = 3
-    static let requestTimeoutSeconds: TimeInterval = 10.0
-    static let maxLoadingTimeSeconds: TimeInterval = 15.0
+    static let requestTimeoutSeconds: TimeInterval = 15.0  // Увеличено до 15 сек
+    static let maxLoadingTimeSeconds: TimeInterval = 20.0
     
     // Ключи для UserDefaults
     static let firstLaunchDateKey = "first_launch_date"
@@ -19,11 +19,17 @@ struct CloakingConstants {
     static let acceptLanguageHeader = "ru-RU,ru;q=0.9,en;q=0.8"
     
     // MARK: - Debug и Testing настройки
+    // 🚀 БОЕВОЙ РЕЖИМ: Все DEBUG настройки отключены
     #if DEBUG
-    static var isTestMode = true     // Включить тестовый режим
-    static var forceWebView = false  // Принудительно показывать веб-вью для тестирования
-    static var forceStubApp = false  // Принудительно показывать белую часть
-    static var mockDelayDays = 4     // Пропускаем задержку (4 дня > 3)
-    static var skipLoadingDelay = true // Убираем задержку загрузки
+    static var isTestMode = false    // 🚀 БОЕВОЙ: Тестовый режим отключен
+    static var forceWebView = false  // 🚀 БОЕВОЙ: Используем реальную логику клоакинга
+    static var forceStubApp = false  // 🚀 БОЕВОЙ: Используем реальную логику клоакинга
+    static var mockDelayDays = -1    // 🚀 БОЕВОЙ: Используем реальные дни (отключен мок)
+    static var skipLoadingDelay = false // 🚀 БОЕВОЙ: Показываем загрузку
+    static var treatTimeoutAsSuccess = true // При timeout показывать WebView (трекер работает частично)
     #endif
+    
+    // MARK: - Production Settings (для продакшн сборки)
+    // В продакшн все #if DEBUG блоки автоматически отключаются
+    // Работает реальная логика: 3 дня задержка + гео-проверка через трекер
 } 

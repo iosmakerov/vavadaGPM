@@ -7,8 +7,9 @@ struct LoadingScreen: View {
     
     var body: some View {
         ZStack {
-            // Фон как в основном приложении
-            BackgroundImageView()
+            // Простой фон как на главном экране
+            ColorManager.background
+                .ignoresSafeArea(.all)
             
             VStack(spacing: 30) {
                 Spacer()

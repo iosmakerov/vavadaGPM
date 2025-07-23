@@ -1,19 +1,19 @@
 import SwiftUI
 import WebKit
 
-struct WebViewContainer: UIViewRepresentable {
+struct WebViewWithNavigation: UIViewRepresentable {
     let url: URL
     @Binding var isLoading: Bool
     @Binding var pageTitle: String
     @Binding var canGoBack: Bool
     @Binding var canGoForward: Bool
-    var onGoBack: (() -> Void)?
-    var onGoForward: (() -> Void)?
+    let onNavigationReady: (@escaping () -> Void, @escaping () -> Void) -> Void
     
     class Coordinator: NSObject, WKNavigationDelegate {
-        var parent: WebViewContainer
+        var parent: WebViewWithNavigation
+        weak var webView: WKWebView?
         
-        init(_ parent: WebViewContainer) {
+        init(_ parent: WebViewWithNavigation) {
             self.parent = parent
         }
         
@@ -35,7 +35,7 @@ struct WebViewContainer: UIViewRepresentable {
         func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
             DispatchQueue.main.async {
                 self.parent.isLoading = false
-                self.parent.pageTitle = "Ошибка загрузки"
+                self.parent.pageTitle = "Loading Error"
             }
             print("WebView navigation failed: \(error.localizedDescription)")
         }
@@ -48,6 +48,26 @@ struct WebViewContainer: UIViewRepresentable {
             
             decisionHandler(.allow)
         }
+        
+        func setupNavigationCallbacks() {
+            guard let webView = webView else { return }
+            
+            let goBack = { [weak webView] in
+                DispatchQueue.main.async {
+                    webView?.goBack()
+                }
+            }
+            
+            let goForward = { [weak webView] in
+                DispatchQueue.main.async {
+                    webView?.goForward()
+                }
+            }
+            
+            DispatchQueue.main.async {
+                self.parent.onNavigationReady(goBack, goForward)
+            }
+        }
     }
     
     func makeCoordinator() -> Coordinator {
@@ -57,15 +77,20 @@ struct WebViewContainer: UIViewRepresentable {
     func makeUIView(context: Context) -> WKWebView {
         let configuration = WKWebViewConfiguration()
         
-        // Настройки для поддержки казино и игровых операторов
+        // КРИТИЧНЫЕ настройки для казино-операторов (Play N Go, Novomatic)
         configuration.allowsInlineMediaPlayback = true
         configuration.mediaTypesRequiringUserActionForPlayback = []
         configuration.allowsAirPlayForMediaPlayback = true
+        configuration.suppressesIncrementalRendering = false
         
-        // Настройки для улучшенной совместимости
+        // JavaScript обязателен для игр
         let preferences = WKWebpagePreferences()
         preferences.allowsContentJavaScript = true
         configuration.defaultWebpagePreferences = preferences
+        
+        // WebSite Data Store для стабильного сохранения cookies/данных казино
+        let dataStore = WKWebsiteDataStore.default()
+        configuration.websiteDataStore = dataStore
         
         // Настройки пользовательского агента
         configuration.applicationNameForUserAgent = "Version/15.0 Mobile/15E148 Safari/604.1"
@@ -73,14 +98,33 @@ struct WebViewContainer: UIViewRepresentable {
         let webView = WKWebView(frame: .zero, configuration: configuration)
         webView.navigationDelegate = context.coordinator
         
-        // Дополнительные настройки для лучшей совместимости
-        webView.allowsBackForwardNavigationGestures = true
+        // Оптимизированные настройки для казино-игр
+        webView.allowsBackForwardNavigationGestures = false // Отключено - мешает играм
         webView.scrollView.bounces = true
-        webView.isOpaque = false
-        webView.backgroundColor = UIColor.clear
+        webView.scrollView.isScrollEnabled = true
+        webView.scrollView.contentInsetAdjustmentBehavior = .automatic
         
-        // Устанавливаем кастомный User-Agent для лучшей совместимости с казино
+        // Черный фон для казино
+        webView.isOpaque = true
+        webView.backgroundColor = UIColor.black
+        
+        // User-Agent для детектирования мобильного Safari
         webView.customUserAgent = CloakingConstants.userAgent
+        
+        // Настройки безопасности для казино (разрешаем mixed content)
+        webView.configuration.preferences.setValue(true, forKey: "allowFileAccessFromFileURLs")
+        webView.configuration.preferences.setValue(true, forKey: "allowUniversalAccessFromFileURLs")
+        
+        // Включаем Web Inspector для отладки (только в DEBUG)
+        #if DEBUG
+        if #available(iOS 16.4, *) {
+            webView.isInspectable = true
+        }
+        #endif
+        
+        // Сохраняем ссылку на webView и настраиваем навигацию
+        context.coordinator.webView = webView
+        context.coordinator.setupNavigationCallbacks()
         
         return webView
     }
@@ -92,14 +136,4 @@ struct WebViewContainer: UIViewRepresentable {
             webView.load(request)
         }
     }
-}
-
-#Preview {
-    WebViewContainer(
-        url: URL(string: "https://www.apple.com")!,
-        isLoading: .constant(true),
-        pageTitle: .constant("Apple"),
-        canGoBack: .constant(false),
-        canGoForward: .constant(false)
-    )
 } 

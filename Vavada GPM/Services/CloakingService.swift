@@ -13,6 +13,14 @@ class CloakingService: ObservableObject {
     // MARK: - Main Cloaking Logic
     func checkAccess() async -> CloakingResult {
         print("🔍 CloakingService: Начинаю проверку доступа")
+        print("🎯 Режим работы: \(CloakingConstants.modeDescription)")
+        
+        // Показываем диагностическую информацию
+        if CloakingConstants.isInProductionMode {
+            ProductionModeSettings.printProductionDiagnostics()
+        } else {
+            NetworkErrorDebugger.printNetworkDiagnostics()
+        }
         
         #if DEBUG
         // Принудительные режимы для тестирования
@@ -56,9 +64,9 @@ class CloakingService: ObservableObject {
             return .showStubApp
         }
         
-        // 3. Делаем запрос к трекеру
+        // 3. Делаем запрос к трекеру с retry
         print("🌍 Делаем запрос к трекеру: \(CloakingConstants.trackerURL)")
-        let response = await makeTrackerRequest()
+        let response = await makeTrackerRequestWithRetry()
         
         switch response.statusCode {
         case 200, 401:
@@ -79,7 +87,29 @@ class CloakingService: ObservableObject {
         }
     }
     
-    // MARK: - Tracker Request
+    // MARK: - Tracker Request with Retry
+    private func makeTrackerRequestWithRetry(maxAttempts: Int = 2) async -> TrackerResponse {
+        for attempt in 1...maxAttempts {
+            print("🔄 Попытка \(attempt)/\(maxAttempts)")
+            
+            let response = await makeTrackerRequest()
+            
+            // Если запрос успешный или это последняя попытка
+            if response.statusCode != 0 || attempt == maxAttempts {
+                return response
+            }
+            
+            // Пауза между попытками (только если это не последняя попытка)
+            if attempt < maxAttempts {
+                print("⏳ Ждем 2 секунды перед следующей попыткой...")
+                try? await Task.sleep(nanoseconds: 2_000_000_000) // 2 секунды
+            }
+        }
+        
+        return TrackerResponse(statusCode: 0, error: CloakingError.timeoutReached)
+    }
+    
+    // MARK: - Single Tracker Request
     private func makeTrackerRequest() async -> TrackerResponse {
         let startTime = CFAbsoluteTimeGetCurrent()
         
@@ -169,10 +199,42 @@ class CloakingService: ObservableObject {
             print("📝 Localized Description: \(error.localizedDescription)")
             print("⚡ Time: \(String(format: "%.2f", responseTime))s")
             
-            // Дополнительная информация об ошибке
+            // Улучшенная обработка разных типов ошибок
             if let urlError = error as? URLError {
                 print("🔍 URLError Code: \(urlError.code.rawValue)")
                 print("🔍 URLError Description: \(urlError.localizedDescription)")
+                
+                switch urlError.code {
+                case .timedOut:
+                    print("⏰ TIMEOUT: Трекер работает медленно, но может быть доступен")
+                    #if DEBUG
+                    if CloakingConstants.treatTimeoutAsSuccess {
+                        print("🧪 DEBUG: treatTimeoutAsSuccess = true")
+                        print("🎯 РЕШЕНИЕ: Показываем WebView (трекер частично работал)")
+                        print("🔚 ===== КОНЕЦ ОШИБКИ =====")
+                        return TrackerResponse(statusCode: 200, error: error)
+                    } else {
+                        print("🧪 DEBUG: treatTimeoutAsSuccess = false") 
+                        print("🎯 РЕШЕНИЕ: Показываем заглушку")
+                    }
+                    #else
+                    print("🎯 РЕШЕНИЕ: Показываем WebView (трекер частично работал)")
+                    print("🔚 ===== КОНЕЦ ОШИБКИ =====")
+                    return TrackerResponse(statusCode: 200, error: error)
+                    #endif
+                    
+                case .notConnectedToInternet, .networkConnectionLost:
+                    print("🌐 СЕТЬ: Нет интернет-соединения")
+                    print("🎯 РЕШЕНИЕ: Показываем заглушку")
+                    
+                case .cannotFindHost, .cannotConnectToHost:
+                    print("🏠 HOST: Не можем подключиться к серверу")
+                    print("🎯 РЕШЕНИЕ: Показываем заглушку")
+                    
+                default:
+                    print("❓ ДРУГАЯ ОШИБКА: Неизвестная сетевая проблема")
+                    print("🎯 РЕШЕНИЕ: Показываем заглушку")
+                }
             }
             
             print("🔚 ===== КОНЕЦ ОШИБКИ =====")
@@ -182,30 +244,21 @@ class CloakingService: ObservableObject {
     
     // MARK: - Network Check
     private func checkInternetConnection() async -> Bool {
-        return await withCheckedContinuation { continuation in
-            let monitor = NWPathMonitor()
-            let queue = DispatchQueue(label: "NetworkMonitor")
-            var hasResumed = false
+        // Простая проверка через URLSession (избегаем concurrency предупреждения)
+        do {
+            let url = URL(string: "https://www.google.com")!
+            let request = URLRequest(url: url, timeoutInterval: 3.0)
+            let (_, response) = try await URLSession.shared.data(for: request)
             
-            monitor.pathUpdateHandler = { path in
-                if !hasResumed {
-                    hasResumed = true
-                    let isConnected = path.status == .satisfied
-                    monitor.cancel()
-                    continuation.resume(returning: isConnected)
-                }
+            if let httpResponse = response as? HTTPURLResponse {
+                return httpResponse.statusCode < 400
             }
-            
-            monitor.start(queue: queue)
-            
-            // Таймаут для проверки соединения
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                if !hasResumed {
-                    hasResumed = true
-                    monitor.cancel()
-                    continuation.resume(returning: false)
-                }
-            }
+            return false
+        } catch {
+            print("🌐 Internet check failed: \(error.localizedDescription)")
+            // Если не можем проверить - предполагаем что интернет есть
+            // (лучше попытаться сделать запрос к трекеру)
+            return true
         }
     }
     

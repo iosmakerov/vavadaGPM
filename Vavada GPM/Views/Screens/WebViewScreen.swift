@@ -7,33 +7,31 @@ struct WebViewScreen: View {
     @Binding var appState: AppState
     
     @State private var isLoading = true
-    @State private var pageTitle = "Загрузка..."
+    @State private var pageTitle = "Loading..."
     @State private var canGoBack = false
     @State private var canGoForward = false
     @State private var showErrorAlert = false
     @State private var errorMessage = ""
+    @State private var webViewNavigationActions: (() -> Void, () -> Void)?
     
     var body: some View {
-        NavigationView {
-            VStack(spacing: 0) {
-                // Safari-стиль тулбар
-                SafariStyleToolbar(
-                    title: isLoading ? "Загрузка..." : pageTitle,
-                    isLoading: isLoading
-                ) {
-                    handleBackButton()
-                }
-                
-                // WebView контейнер
+        GeometryReader { geometry in
+            ZStack {
+                // WebView на весь экран
                 if let webURL = URL(string: url) {
-                    WebViewContainer(
+                    WebViewWithNavigation(
                         url: webURL,
                         isLoading: $isLoading,
                         pageTitle: $pageTitle,
                         canGoBack: $canGoBack,
-                        canGoForward: $canGoForward
+                        canGoForward: $canGoForward,
+                        onNavigationReady: { goBack, goForward in
+                            webViewNavigationActions = (goBack, goForward)
+                        }
                     )
                     .background(Color.black)
+                    .ignoresSafeArea(.all, edges: .top)
+                    
                 } else {
                     // Fallback в случае некорректного URL
                     VStack(spacing: 20) {
@@ -43,17 +41,18 @@ struct WebViewScreen: View {
                             .font(.system(size: 50))
                             .foregroundColor(ColorManager.primaryRed)
                         
-                        Text("Ошибка загрузки")
+                        Text("Loading Error")
                             .font(FontManager.title)
                             .foregroundColor(ColorManager.white)
                         
-                        Text("Не удалось загрузить страницу")
+                        Text("Unable to load page")
                             .font(FontManager.body)
                             .foregroundColor(ColorManager.textSecondary)
                             .multilineTextAlignment(.center)
                         
-                        Button("Вернуться") {
-                            handleBackButton()
+                        Button("Close App") {
+                            // Закрыть приложение полностью
+                            exit(0)
                         }
                         .buttonStyle(CustomButtonStyle())
                         .padding(.top, 20)
@@ -63,18 +62,45 @@ struct WebViewScreen: View {
                     .padding()
                     .background(ColorManager.background)
                 }
+                
+                // Safari-style нижний toolbar
+                VStack {
+                    Spacer()
+                    
+                    SafariBottomToolbar(
+                        canGoBack: canGoBack,
+                        canGoForward: canGoForward,
+                        isLoading: isLoading,
+                        onBackTapped: {
+                            handleWebBackButton()
+                        },
+                        onForwardTapped: {
+                            handleWebForwardButton()
+                        }
+                    )
+                    .padding(.bottom, geometry.safeAreaInsets.bottom)
+                }
             }
         }
         .navigationBarHidden(true)
         .navigationBarBackButtonHidden(true)
+        .interactiveDismissDisabled() // Запрет на swipe-to-dismiss
+        .gesture(
+            // Блокируем swipe жесты для выхода
+            DragGesture()
+                .onEnded { _ in
+                    // Ничего не делаем - блокируем навигацию
+                }
+        )
         .onAppear {
             print("🌐 WebViewScreen opened with URL: \(url)")
             setupForWebView()
         }
-        .alert("Ошибка", isPresented: $showErrorAlert) {
+        .alert("Error", isPresented: $showErrorAlert) {
             Button("OK") { }
-            Button("Вернуться") {
-                handleBackButton()
+            Button("Close App") {
+                // Закрыть приложение полностью при ошибке
+                exit(0)
             }
         } message: {
             Text(errorMessage)
@@ -83,14 +109,22 @@ struct WebViewScreen: View {
         .supportedOrientations(.all)
     }
     
-    private func handleBackButton() {
-        print("📱 WebView: Кнопка 'Назад' нажата")
-        appState = .stubApp
+    // MARK: - Actions
+    private func handleWebBackButton() {
+        print("📱 WebView: Back button tapped")
+        webViewNavigationActions?.0()
     }
+    
+    private func handleWebForwardButton() {
+        print("📱 WebView: Forward button tapped")
+        webViewNavigationActions?.1()
+    }
+    
+    // Удалена функция handleExitButton - теперь из WebView нельзя выйти
     
     private func setupForWebView() {
         // Дополнительные настройки для веб-вью
-        print("⚙️ WebView: Настройка завершена")
+        print("⚙️ WebView: Setup completed")
     }
 }
 
