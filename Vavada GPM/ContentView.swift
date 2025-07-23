@@ -1,17 +1,21 @@
 import SwiftUI
+
+enum AppState {
+    case loading
+    case stubApp
+}
+
 struct ContentView: View {
     @State private var appState: AppState = .loading
-    @StateObject private var cloakingService = CloakingService()
+    
     var body: some View {
         Group {
             switch appState {
             case .loading:
                 LoadingScreen()
                     .task {
-                        await performCloakingCheck()
+                        await showGameApp()
                     }
-            case .webView(let url):
-                WebViewScreen(url: url, appState: $appState)
             case .stubApp:
                 TabContainerView()
             }
@@ -21,29 +25,11 @@ struct ContentView: View {
             GameDataService.shared.recordAppLaunch()
         }
     }
-    private func performCloakingCheck() async {
-        do {
-            #if DEBUG
-            if !CloakingConstants.skipLoadingDelay {
-                try await Task.sleep(nanoseconds: 1_500_000_000) 
-            }
-            #else
-            try await Task.sleep(nanoseconds: 1_500_000_000) 
-            #endif
-            let result = await cloakingService.checkAccess()
-            await MainActor.run {
-                switch result {
-                case .showWebView(let url):
-                    appState = .webView(url: url)
-                case .showStubApp:
-                    appState = .stubApp
-                }
-            }
-        } catch {
-            print("❌ Ошибка при проверке клоакинга: \(error)")
-            await MainActor.run {
-                appState = .stubApp
-            }
+    
+    private func showGameApp() async {
+        try? await Task.sleep(nanoseconds: 1_500_000_000) 
+        await MainActor.run {
+            appState = .stubApp
         }
     }
 }

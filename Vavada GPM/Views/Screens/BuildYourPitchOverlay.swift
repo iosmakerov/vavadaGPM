@@ -378,6 +378,18 @@ struct TextInputOverlay: View {
     let title: String
     @Binding var text: String
     let onSave: (String) -> Void
+    
+    private func generateRandomText() {
+        let templates = [
+            "Our innovative solution addresses the critical problem of inefficient processes in modern business environments.",
+            "We are revolutionizing the industry by leveraging cutting-edge technology to deliver unprecedented value to our customers.", 
+            "Through strategic partnerships and data-driven insights, we are creating a sustainable competitive advantage in the marketplace.",
+            "Our platform combines artificial intelligence with human expertise to solve complex challenges that have plagued businesses for decades.",
+            "By streamlining operations and reducing costs, we enable organizations to focus on what matters most - growth and innovation."
+        ]
+        text = templates.randomElement() ?? templates[0]
+    }
+    
     var body: some View {
         ZStack {
             Color.black.opacity(0.8)
@@ -393,17 +405,34 @@ struct TextInputOverlay: View {
                         RoundedRectangle(cornerRadius: 12)
                             .stroke(ColorManager.white, lineWidth: 2)
                     )
-                Button("OK") {
-                    onSave(text)
-                    isPresented = false
+                HStack(spacing: 16) {
+                    Button("GENERATE") {
+                        generateRandomText()
+                    }
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundColor(ColorManager.white)
+                    .frame(width: 110, height: 50)
+                    .background(
+                        RoundedRectangle(cornerRadius: 25)
+                            .fill(ColorManager.tabBarGradient)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 25)
+                                    .stroke(ColorManager.primaryRed, lineWidth: 2)
+                            )
+                    )
+                    
+                    Button("OK") {
+                        onSave(text)
+                        isPresented = false
+                    }
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(ColorManager.white)
+                    .frame(width: 110, height: 50)
+                    .background(
+                        RoundedRectangle(cornerRadius: 25)
+                            .fill(ColorManager.primaryRed)
+                    )
                 }
-                .font(.system(size: 18, weight: .bold))
-                .foregroundColor(ColorManager.white)
-                .frame(width: 120, height: 50)
-                .background(
-                    RoundedRectangle(cornerRadius: 25)
-                        .fill(ColorManager.primaryRed)
-                )
             }
             .padding(32)
             .background(

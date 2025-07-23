@@ -125,7 +125,7 @@ struct JoinLobbyOverlay: View {
                             .font(FontManager.body)
                             .foregroundColor(ColorManager.white)
                             .fontWeight(.bold)
-                        Image("qr_code-34d964")
+                        Image("qr_code")
                             .resizable()
                             .interpolation(.none)
                             .aspectRatio(contentMode: .fit)
@@ -136,6 +136,20 @@ struct JoinLobbyOverlay: View {
                                 RoundedRectangle(cornerRadius: 8)
                                     .stroke(Color.white, lineWidth: 4)
                             )
+                    }
+                    
+                    VStack(spacing: 12) {
+                        Text("Promo Codes")
+                            .font(FontManager.body)
+                            .foregroundColor(ColorManager.white)
+                            .fontWeight(.bold)
+                        
+                        LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 12) {
+                            PromoCodeView(code: "FRIEND30", discount: "30% OFF")
+                            PromoCodeView(code: "TEAM75", discount: "75 COINS")
+                            PromoCodeView(code: "JOIN40", discount: "40% BOOST")
+                            PromoCodeView(code: "PARTY20", discount: "20% OFF")
+                        }
                     }
                     switch joinState {
                     case .entering:
@@ -225,6 +239,8 @@ struct JoinLobbyOverlay: View {
         }
     }
 }
+
+
 struct JoinLobbyOverlay_Previews: PreviewProvider {
     static var previews: some View {
         JoinLobbyOverlay(isPresented: .constant(true))
