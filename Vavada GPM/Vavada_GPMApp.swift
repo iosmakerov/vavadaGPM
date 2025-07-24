@@ -32,7 +32,7 @@ struct Vavada_GPMApp: App {
                 }
             }
             .environmentObject(appStateManager)
-            .preferredColorScheme(.light)
+            .preferredColorScheme(.dark)
         }
     }
 }
