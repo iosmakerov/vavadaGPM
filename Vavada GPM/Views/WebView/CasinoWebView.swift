@@ -9,59 +9,73 @@ struct CasinoWebView: View {
 
     @State private var orientation = UIDevice.current.orientation
     @State private var screenSize = CGSize.zero
+    
+    // Высота тулбара
+    private let toolbarHeight: CGFloat = 50
 
     var body: some View {
         GeometryReader { geometry in
             ZStack {
+                // Фон для всего экрана, включая safe area сверху
+                ColorManager.background
+                    .ignoresSafeArea(.all)
 
                 if let url = URL(string: urlString) {
-                    CasinoWebViewRepresentable(
-                        url: url,
-                        canGoBack: $canGoBack,
-                        canGoForward: $canGoForward,
-                        webViewStore: webViewStore
-                    )
-                    .ignoresSafeArea()
-                    .onAppear {
+                    VStack(spacing: 0) {
+                        CasinoWebViewRepresentable(
+                            url: url,
+                            canGoBack: $canGoBack,
+                            canGoForward: $canGoForward,
+                            webViewStore: webViewStore
+                        )
+                        .ignoresSafeArea(.all, edges: [.leading, .trailing, .top])
+                        .onAppear {
 
-                        OrientationManager.shared.unlockAllOrientations()
+                            OrientationManager.shared.unlockAllOrientations()
 
-                        screenSize = geometry.size
+                            screenSize = geometry.size
 
-                        NotificationCenter.default.addObserver(
-                            forName: UIApplication.willResignActiveNotification,
-                            object: nil,
-                            queue: .main
-                        ) { _ in
+                            NotificationCenter.default.addObserver(
+                                forName: UIApplication.willResignActiveNotification,
+                                object: nil,
+                                queue: .main
+                            ) { _ in
+                                GlobalWebViewManager.shared.forceSaveCookies()
+                                webViewStore.saveCurrentState()
+                            }
+                        }
+                        .onDisappear {
+
                             GlobalWebViewManager.shared.forceSaveCookies()
                             webViewStore.saveCurrentState()
+
+                            NotificationCenter.default.removeObserver(
+                                self,
+                                name: UIApplication.willResignActiveNotification,
+                                object: nil
+                            )
+
+                            OrientationManager.shared.lockToPortrait()
                         }
-                    }
-                    .onDisappear {
+                        .onChange(of: geometry.size) { newSize in
 
-                        GlobalWebViewManager.shared.forceSaveCookies()
-                        webViewStore.saveCurrentState()
-
-                        NotificationCenter.default.removeObserver(
-                            self,
-                            name: UIApplication.willResignActiveNotification,
-                            object: nil
-                        )
-
-                        OrientationManager.shared.lockToPortrait()
-                    }
-                    .onChange(of: geometry.size) { newSize in
-
-                        if newSize != screenSize {
-                            screenSize = newSize
+                            if newSize != screenSize {
+                                screenSize = newSize
+                            }
                         }
-                    }
-
-                    VStack {
-                        Spacer()
+                        
                         bottomToolbar
                     }
                     .ignoresSafeArea(.keyboard)
+                
+                // Перекрытие только области под "челкой" 
+                VStack {
+                    ColorManager.background
+                        .frame(height: geometry.safeAreaInsets.top)
+                        .ignoresSafeArea(.all, edges: .top)
+                    Spacer()
+                }
+                
                 } else {
 
                     VStack {
@@ -77,7 +91,7 @@ struct CasinoWebView: View {
                 }
             }
         }
-        .preferredColorScheme(.light)
+        .preferredColorScheme(.dark)
 
         .onAppear {
             OrientationManager.shared.setSupportedOrientations(.allButUpsideDown)
@@ -99,7 +113,7 @@ struct CasinoWebView: View {
             }) {
                 Image(systemName: "chevron.left")
                     .font(.system(size: 24, weight: .medium))
-                    .foregroundColor(canGoBack ? .white : Color.white.opacity(0.3))
+                    .foregroundColor(canGoBack ? .blue : ColorManager.inactiveGray)
                     .frame(width: 50, height: 50)
             }
             .disabled(!canGoBack)
@@ -110,22 +124,16 @@ struct CasinoWebView: View {
             }) {
                 Image(systemName: "chevron.right")
                     .font(.system(size: 24, weight: .medium))
-                    .foregroundColor(canGoForward ? .white : Color.white.opacity(0.3))
+                    .foregroundColor(canGoForward ? .blue : ColorManager.inactiveGray)
                     .frame(width: 50, height: 50)
             }
             .disabled(!canGoForward)
             .frame(maxWidth: .infinity)
         }
-        .frame(height: 50)
-        .background(
-            ColorManager.background
-                .overlay(
-                    Rectangle()
-                        .frame(height: 0.5)
-                        .foregroundColor(Color.white.opacity(0.2)),
-                    alignment: .top
-                )
-        )
+        .frame(height: toolbarHeight)
+        .background(ColorManager.background)
+        // Растягиваем тулбар до самого низа экрана
+        .ignoresSafeArea(.all, edges: .bottom)
     }
 }
 
