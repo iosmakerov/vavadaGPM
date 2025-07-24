@@ -6,37 +6,12 @@ class StorageManager {
     private let userDefaults = UserDefaults.standard
 
     private enum Keys {
-        static let firstLaunchDate = "app.firstLaunchDate"
         static let cloakingResult = "app.cloakingResult"
         static let cloakingURL = "app.cloakingURL"
         static let wasNetworkError = "app.wasNetworkError"
     }
 
     private init() {}
-
-    var firstLaunchDate: Date? {
-        get {
-            userDefaults.object(forKey: Keys.firstLaunchDate) as? Date
-        }
-        set {
-            userDefaults.set(newValue, forKey: Keys.firstLaunchDate)
-        }
-    }
-
-    func hasPassedDaysSinceFirstLaunch(_ days: Int) -> Bool {
-        guard let firstLaunch = firstLaunchDate else {
-
-            let now = Date()
-            print("📅 [StorageManager] No first launch date found, setting to: \(now)")
-            firstLaunchDate = now
-            return false
-        }
-
-        let daysPassed = Calendar.current.dateComponents([.day], from: firstLaunch, to: Date()).day ?? 0
-        print("📅 [StorageManager] First launch: \(firstLaunch)")
-        print("📅 [StorageManager] Days passed: \(daysPassed) / Required: \(days)")
-        return daysPassed >= days
-    }
 
     var cloakingResult: Bool? {
         get {

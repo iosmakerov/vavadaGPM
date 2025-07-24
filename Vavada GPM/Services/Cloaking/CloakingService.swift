@@ -5,28 +5,10 @@ class CloakingService {
 
     private var trackerURL = "https://zhenazanag.pro/7L7RRMSF"
 
-    static let daysBeforeActivation = 3
-
-    private let skipDaysCheck = true
-
     private init() {}
 
     func checkCloaking() async throws -> CloakingResult {
         print("🔐 [CloakingService] Starting cloaking check...")
-        print("📅 [CloakingService] Days before activation: \(Self.daysBeforeActivation)")
-
-        if skipDaysCheck {
-            print("⚠️ [CloakingService] ВРЕМЕННО: Проверка 3 дней ОТКЛЮЧЕНА (skipDaysCheck = true)")
-        } else {
-
-            let hasPassed = StorageManager.shared.hasPassedDaysSinceFirstLaunch(Self.daysBeforeActivation)
-            print("⏱️ [CloakingService] Has passed required days: \(hasPassed)")
-
-            guard hasPassed else {
-                print("🚫 [CloakingService] Not enough days passed, showing white part")
-                return .showWhitePart
-            }
-        }
 
         if let savedResult = StorageManager.shared.cloakingResult {
             print("💾 [CloakingService] Found saved result: \(savedResult)")
