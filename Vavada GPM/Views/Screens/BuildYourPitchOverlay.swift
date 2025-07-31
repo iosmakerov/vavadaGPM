@@ -378,7 +378,6 @@ struct TextInputOverlay: View {
     let title: String
     @Binding var text: String
     let onSave: (String) -> Void
-
     private func generateRandomText() {
         let templates = [
             "Our innovative solution addresses the critical problem of inefficient processes in modern business environments.",
@@ -389,7 +388,6 @@ struct TextInputOverlay: View {
         ]
         text = templates.randomElement() ?? templates[0]
     }
-
     var body: some View {
         ZStack {
             Color.black.opacity(0.8)
@@ -420,7 +418,6 @@ struct TextInputOverlay: View {
                                     .stroke(ColorManager.primaryRed, lineWidth: 2)
                             )
                     )
-
                     Button("OK") {
                         onSave(text)
                         isPresented = false

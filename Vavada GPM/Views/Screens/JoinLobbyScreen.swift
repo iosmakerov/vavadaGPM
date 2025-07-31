@@ -137,24 +137,7 @@ struct JoinLobbyOverlay: View {
                                     .stroke(Color.white, lineWidth: 4)
                             )
                     }
-
-                    // MARK: - Временно скрыто для white part релиза
-                    // TODO: Вернуть промокоды в следующем обновлении
-                    /*
-                    VStack(spacing: 12) {
-                        Text("Promo Codes")
-                            .font(FontManager.body)
-                            .foregroundColor(ColorManager.white)
-                            .fontWeight(.bold)
-
-                        LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 12) {
-                            PromoCodeView(code: "FRIEND30", discount: "30% OFF")
-                            PromoCodeView(code: "TEAM75", discount: "75 COINS")
-                            PromoCodeView(code: "JOIN40", discount: "40% BOOST")
-                            PromoCodeView(code: "PARTY20", discount: "20% OFF")
-                        }
-                    }
-                    */
+                    
                     switch joinState {
                     case .entering:
                         Text("Enter lobby code or scan QR")
@@ -243,7 +226,6 @@ struct JoinLobbyOverlay: View {
         }
     }
 }
-
 struct JoinLobbyOverlay_Previews: PreviewProvider {
     static var previews: some View {
         JoinLobbyOverlay(isPresented: .constant(true))

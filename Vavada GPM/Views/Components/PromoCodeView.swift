@@ -1,10 +1,8 @@
 import SwiftUI
-
 struct PromoCodeView: View {
     let code: String
     let discount: String
     @State private var isCopied = false
-
     var body: some View {
         Button(action: {
             UIPasteboard.general.string = code

@@ -147,24 +147,7 @@ struct CreateLobbyOverlay: View {
                             .background(Color.white)
                             .clipShape(RoundedRectangle(cornerRadius: 8))
                     }
-
-                    // MARK: - Временно скрыто для white part релиза
-                    // TODO: Вернуть промокоды в следующем обновлении
-                    /*
-                    VStack(spacing: 12) {
-                        Text("Promo Codes")
-                            .font(FontManager.body)
-                            .foregroundColor(ColorManager.white)
-                            .fontWeight(.bold)
-
-                        LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 12) {
-                            PromoCodeView(code: "NEWBIE25", discount: "25% OFF")
-                            PromoCodeView(code: "WINNER50", discount: "50% OFF")
-                            PromoCodeView(code: "GOLD100", discount: "100 COINS")
-                            PromoCodeView(code: "BOOST30", discount: "30% BOOST")
-                        }
-                    }
-                    */
+                    
                     if lobbyCreated {
                         VStack(spacing: 8) {
                             Text("Players: \(currentPlayers)/\(numberOfPlayers)")
@@ -236,7 +219,6 @@ struct CreateLobbyOverlay: View {
         }
     }
 }
-
 struct CreateLobbyOverlay_Previews: PreviewProvider {
     static var previews: some View {
         CreateLobbyOverlay(isPresented: .constant(true))
