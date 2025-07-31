@@ -138,6 +138,9 @@ struct JoinLobbyOverlay: View {
                             )
                     }
 
+                    // MARK: - Временно скрыто для white part релиза
+                    // TODO: Вернуть промокоды в следующем обновлении
+                    /*
                     VStack(spacing: 12) {
                         Text("Promo Codes")
                             .font(FontManager.body)
@@ -151,6 +154,7 @@ struct JoinLobbyOverlay: View {
                             PromoCodeView(code: "PARTY20", discount: "20% OFF")
                         }
                     }
+                    */
                     switch joinState {
                     case .entering:
                         Text("Enter lobby code or scan QR")

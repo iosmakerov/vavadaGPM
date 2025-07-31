@@ -148,6 +148,9 @@ struct CreateLobbyOverlay: View {
                             .clipShape(RoundedRectangle(cornerRadius: 8))
                     }
 
+                    // MARK: - Временно скрыто для white part релиза
+                    // TODO: Вернуть промокоды в следующем обновлении
+                    /*
                     VStack(spacing: 12) {
                         Text("Promo Codes")
                             .font(FontManager.body)
@@ -161,6 +164,7 @@ struct CreateLobbyOverlay: View {
                             PromoCodeView(code: "BOOST30", discount: "30% BOOST")
                         }
                     }
+                    */
                     if lobbyCreated {
                         VStack(spacing: 8) {
                             Text("Players: \(currentPlayers)/\(numberOfPlayers)")
