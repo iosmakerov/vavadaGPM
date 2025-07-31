@@ -7,7 +7,7 @@ struct MainMenuScreen: View {
         VStack(spacing: 0) {
             VStack {
                 Spacer()
-                Text("WELCOME TO GPM")
+                Text("Viral Ventures")
                     .font(FontManager.titleLarge)
                     .foregroundColor(ColorManager.primaryRed)
                     .shadow(color: .white, radius: 1)
