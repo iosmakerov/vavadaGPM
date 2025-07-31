@@ -40,6 +40,10 @@ struct AboutScreen: View {
                 Text("App version: 1.00")
                     .font(.system(size: 18, weight: .bold))
                     .foregroundColor(ColorManager.white)
+                
+                // MARK: - Временно скрыто для white part релиза
+                // TODO: Вернуть в следующем обновлении
+                /*
                 VStack(spacing: 16) {
                     CustomButton(title: "SUPPORT") {
                         print("Support tapped")
@@ -49,6 +53,7 @@ struct AboutScreen: View {
                     }
                 }
                 .padding(.horizontal, 20)
+                */
             }
             .padding(.vertical, 50)
             .background(
