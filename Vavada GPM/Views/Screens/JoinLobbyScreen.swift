@@ -168,7 +168,7 @@ struct JoinLobbyOverlay: View {
                             .multilineTextAlignment(.center)
                     case .success:
                         VStack(spacing: 8) {
-                            Text("✅ Successfully joined!")
+                            Text("Lobby not found")
                                 .font(FontManager.body)
                                 .foregroundColor(ColorManager.primaryRed)
                                 .fontWeight(.bold)
